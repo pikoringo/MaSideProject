@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MaBestie App</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="app">
+
+    <header>
+        <h1>MABESTIE</h1>
+        <p>🌸 Welcome to Japan! 🌸</p>
+    </header>
+
+    <section class="menu">
+
+        <button class="menu-card" id="procedures-button">
+            <span class="menu-icon">🏛️</span>
+
+            <span class="menu-text">
+                <strong>Japan Procedures</strong>
+                <small>Government & arrival checklist</small>
+            </span>
+
+            <span class="arrow">›</span>
+        </button>
+
+        <button class="menu-card" id="survival-button">
+            <span class="menu-icon">⚔️</span>
+
+            <span class="menu-text">
+                <strong>Survival Guide</strong>
+                <small>Emergency numbers & useful information</small>
+            </span>
+
+            <span class="arrow">›</span>
+        </button>
+
+        <button class="menu-card" id="dates-button">
+            <span class="menu-icon">💕</span>
+
+            <span class="menu-text">
+                <strong>Date Ideas</strong>
+                <small>Things we want to do together</small>
+            </span>
+
+            <span class="arrow">›</span>
+        </button>
+
+    </section>
+
+</main>
+
+<section id="procedures-page" class="page">
+
+    <button id="procedures-back-button">← Back</button>
+
+    <h1>🏛️ Japan Procedures</h1>
+
+    <p>Things to take care of after arriving in Japan.</p>
+
+    <div id="task-list"></div>
+
+</section>
+
+<section id="survival-page" class="page">
+    <button id="survival-back-button">← Back</button>
+
+    <h1>🆘 Survival</h1>
+
+    <p>Useful information for everyday life in Japan.</p>
+
+    <div class="survival-section">
+    <button class="survival-title">
+        🚨 Emergency numbers
+        <span>＋</span>
+    </button>
+
+    <div class="survival-content">
+        <p><strong>110</strong> — Police</p>
+        <p><strong>119</strong> — Ambulance / Fire</p>
+        <p><strong>118</strong> — Coast Guard</p>
+    </div>
+</div>
+
+<div class="survival-section">
+    <button class="survival-title">
+        🏠 Everyday life
+        <span>＋</span>
+    </button>
+
+    <div class="survival-content">
+        <p>Keep your residence card with you when required.</p>
+        <p>Sort garbage according to your local area's rules.</p>
+        <p>Follow quiet-hour rules in your apartment.</p>
+    </div>
+</div>
+
+<div class="survival-section">
+    <button class="survival-title">
+        🚃 Transportation
+        <span>＋</span>
+    </button>
+
+    <div class="survival-content">
+        <p>Check train times before leaving.</p>
+        <p>Stand on the appropriate side of the platform.</p>
+        <p>Be mindful of priority seating.</p>
+    </div>
+</div>
+</section>
+
+<section id="dates-page" class="page">
+    <button id="dates-back-button">← Back</button>
+
+    <h1>Date Ideas</h1>
+
+    <p>Places and things we want to do together.</p>
+
+    <div class="date-input">
+        <input
+            type="text"
+            id="date-idea-input"
+            placeholder="e.g. Visit a cat cafe 🐱"
+        >
+
+        <button id="add-date-button">Add</button>
+    </div>
+
+<div id="date-idea-list"></div>
+
+</section>
+
+<script src="app.js"></script>
+
+</body>
+</html>
