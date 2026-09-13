@@ -13,131 +13,163 @@
 
     <main class="app">
 
-    <header>
-        <h1>MABESTIE</h1>
-        <p>🌸 Welcome to Japan! 🌸</p>
-    </header>
+        <section id="login-page">
 
-    <section class="menu">
+            <h1>Well hello there!</h1>
 
-        <button class="menu-card" id="procedures-button">
-            <span class="menu-icon">🏛️</span>
+            <p class="login-question">
+                ✨ Which bestie art thou? ✨
+            </p>
 
-            <span class="menu-text">
-                <strong>Japan Procedures</strong>
-                <small>Government & arrival checklist</small>
-            </span>
+            <div class="character-options">
 
-            <span class="arrow">›</span>
-        </button>
+                <button class="character-card" type="button">
+                    <div class="character-placeholder">
+                        🌸
+                    </div>
+                    <strong>Rin</strong>
+                </button>
 
-        <button class="menu-card" id="survival-button">
-            <span class="menu-icon">⚔️</span>
+                <button class="character-card" type="button">
+                    <div class="character-placeholder">
+                        🐻
+                    </div>
+                    <strong>Julius</strong>
+                </button>
 
-            <span class="menu-text">
-                <strong>Survival Guide</strong>
-                <small>Emergency numbers & useful information</small>
-            </span>
+            </div>
 
-            <span class="arrow">›</span>
-        </button>
+        </section>
 
-        <button class="menu-card" id="dates-button">
-            <span class="menu-icon">💕</span>
+        <section id="home-page">
 
-            <span class="menu-text">
-                <strong>Date Ideas</strong>
-                <small>Things we want to do together</small>
-            </span>
+            <header>
+                <h1 id="home-title">Hello, Mabestie!</h1>
+                <p id="home-welcome">🌸 Welcome to Japan! 🌸</p>
+            </header>
 
-            <span class="arrow">›</span>
-        </button>
+            <section class="menu">
+
+                <button class="menu-card" id="procedures-button">
+                    <span class="menu-icon">🏛️</span>
+
+                    <span class="menu-text">
+                        <strong>Japan Procedures</strong>
+                        <small>Government & arrival checklist</small>
+                    </span>
+
+                    <span class="arrow">›</span>
+                </button>
+
+                <button class="menu-card" id="survival-button">
+                    <span class="menu-icon">⚔️</span>
+
+                    <span class="menu-text">
+                        <strong>Survival Guide</strong>
+                        <small>Emergency numbers & useful information</small>
+                    </span>
+
+                    <span class="arrow">›</span>
+                </button>
+
+                <button class="menu-card" id="dates-button">
+                    <span class="menu-icon">💕</span>
+
+                    <span class="menu-text">
+                        <strong>Date Ideas</strong>
+                        <small>Things we want to do together</small>
+                    </span>
+
+                    <span class="arrow">›</span>
+                </button>
+
+            </section>
+        </section>
+
+    </main>
+
+    <section id="procedures-page" class="page">
+
+        <button id="procedures-back-button">← Back</button>
+
+        <h1>🏛️ Japan Procedures</h1>
+
+        <p>Things to take care of after arriving in Japan.</p>
+
+        <div id="task-list"></div>
 
     </section>
 
-</main>
+    <section id="survival-page" class="page">
+        <button id="survival-back-button">← Back</button>
 
-<section id="procedures-page" class="page">
+        <h1>🆘 Survival</h1>
 
-    <button id="procedures-back-button">← Back</button>
+        <p>Useful information for everyday life in Japan.</p>
 
-    <h1>🏛️ Japan Procedures</h1>
+        <div class="survival-section">
+            <button class="survival-title">
+                🚨 Emergency numbers
+                <span>＋</span>
+            </button>
 
-    <p>Things to take care of after arriving in Japan.</p>
+            <div class="survival-content">
+                <p><strong>110</strong> — Police</p>
+                <p><strong>119</strong> — Ambulance / Fire</p>
+                <p><strong>118</strong> — Coast Guard</p>
+            </div>
+        </div>
 
-    <div id="task-list"></div>
+        <div class="survival-section">
+            <button class="survival-title">
+                🏠 Everyday life
+                <span>＋</span>
+            </button>
 
-</section>
+            <div class="survival-content">
+                <p>Keep your residence card with you when required.</p>
+                <p>Sort garbage according to your local area's rules.</p>
+                <p>Follow quiet-hour rules in your apartment.</p>
+            </div>
+        </div>
 
-<section id="survival-page" class="page">
-    <button id="survival-back-button">← Back</button>
+        <div class="survival-section">
+            <button class="survival-title">
+                🚃 Transportation
+                <span>＋</span>
+            </button>
 
-    <h1>🆘 Survival</h1>
+            <div class="survival-content">
+                <p>Check train times before leaving.</p>
+                <p>Stand on the appropriate side of the platform.</p>
+                <p>Be mindful of priority seating.</p>
+            </div>
+        </div>
+    </section>
 
-    <p>Useful information for everyday life in Japan.</p>
+    <section id="dates-page" class="page">
+        <button id="dates-back-button">← Back</button>
 
-    <div class="survival-section">
-    <button class="survival-title">
-        🚨 Emergency numbers
-        <span>＋</span>
-    </button>
+        <h1>Date Ideas</h1>
 
-    <div class="survival-content">
-        <p><strong>110</strong> — Police</p>
-        <p><strong>119</strong> — Ambulance / Fire</p>
-        <p><strong>118</strong> — Coast Guard</p>
-    </div>
-</div>
+        <p>Places and things we want to do together.</p>
 
-<div class="survival-section">
-    <button class="survival-title">
-        🏠 Everyday life
-        <span>＋</span>
-    </button>
+        <div class="date-input">
+            <input
+                type="text"
+                id="date-idea-input"
+                placeholder="e.g. Visit a cat cafe 🐱"
+            >
 
-    <div class="survival-content">
-        <p>Keep your residence card with you when required.</p>
-        <p>Sort garbage according to your local area's rules.</p>
-        <p>Follow quiet-hour rules in your apartment.</p>
-    </div>
-</div>
+            <button id="add-date-button">Add</button>
+        </div>
 
-<div class="survival-section">
-    <button class="survival-title">
-        🚃 Transportation
-        <span>＋</span>
-    </button>
+        <div id="date-idea-list"></div>
 
-    <div class="survival-content">
-        <p>Check train times before leaving.</p>
-        <p>Stand on the appropriate side of the platform.</p>
-        <p>Be mindful of priority seating.</p>
-    </div>
-</div>
-</section>
+    </section>
 
-<section id="dates-page" class="page">
-    <button id="dates-back-button">← Back</button>
-
-    <h1>Date Ideas</h1>
-
-    <p>Places and things we want to do together.</p>
-
-    <div class="date-input">
-        <input
-            type="text"
-            id="date-idea-input"
-            placeholder="e.g. Visit a cat cafe 🐱"
-        >
-
-        <button id="add-date-button">Add</button>
-    </div>
-
-<div id="date-idea-list"></div>
-
-</section>
-
-<script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
 
 </body>
 </html>

@@ -25,6 +25,51 @@ p {
     color: #806f74;
 }
 
+#home-page {
+    display: none;
+}
+
+.login-question {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.character-options {
+    display: flex;
+    gap: 16px;
+    margin-top: 30px;
+}
+
+.character-card {
+    flex: 1;
+    border: 3px solid transparent;
+    border-radius: 20px;
+    background-color: white;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #3d3437;
+}
+
+.character-card:hover {
+    transform: translateY(-3px);
+}
+
+.character-placeholder {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff8fa;
+    border-radius: 16px;
+    font-size: 70px;
+    margin-bottom: 12px;
+}
+
+.character-card.selected {
+    border-color: #e8a6b5;
+}
+
 .menu {
     display: flex;
     flex-direction: column;
@@ -259,3 +304,4 @@ p {
     font-size: 13px;
     margin: 8px 0;
 }
+

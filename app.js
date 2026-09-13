@@ -1,4 +1,54 @@
-const homePage = document.querySelector(".app");
+const SUPABASE_URL = "https://yxogvfsgfekipibthjxs.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_DFh8lrv4AZtbwQLQkOCX-A_bIV7DVxS";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+console.log("Supabase connected:", supabaseClient);
+
+const characterCards = document.querySelectorAll(".character-card");
+const loginPage = document.getElementById("login-page");
+const homePage = document.getElementById("home-page");
+
+const savedUser = localStorage.getItem("currentUser");
+
+if (savedUser) {
+    loginPage.style.display = "none";
+    homePage.style.display = "block";
+}
+
+characterCards.forEach((card) => {
+
+    card.addEventListener("click", () => {
+
+        const selectedCharacter =
+            card.querySelector("strong").textContent;
+
+        localStorage.setItem(
+            "currentUser",
+            selectedCharacter
+        );
+
+        loginPage.style.display = "none";
+        homePage.style.display = "block";
+
+    });
+
+});
+
+const homeTitle = document.getElementById("home-title");
+const homeWelcome = document.getElementById("home-welcome");
+
+if (savedUser === "Rin") {
+    homeTitle.textContent = "Hello, creator!";
+    homeWelcome.textContent = "What are we up to?";
+}
+
+if (savedUser === "Julius") {
+    homeTitle.textContent = "Hello, my amazing boyfriend!";
+    homeWelcome.textContent = "🌸 Welcome to Japan! 🌸";
+}
 
 const proceduresButton = document.getElementById("procedures-button");
 const proceduresPage = document.getElementById("procedures-page");
@@ -220,19 +270,37 @@ tasks.forEach((task) => {
 
     const checkbox = document.getElementById(`${task.id}-task`);
 
-    checkbox.addEventListener("change", () => {
-    localStorage.setItem(
-        task.id,
-        checkbox.checked
-    );
+    checkbox.addEventListener("change", async () => {
 
-    taskElement.classList.toggle(
-        "completed",
-        checkbox.checked
-    );
+        localStorage.setItem(task.id, checkbox.checked);
 
-    updateTaskLocks();
-});
+        taskElement.classList.toggle(
+            "completed",
+            checkbox.checked
+        );
+
+        const currentUser = localStorage.getItem("currentUser");
+
+        const { error } = await supabaseClient
+            .from("task_progress")
+            .upsert(
+                {
+                    task_id: task.id,
+                    completed: checkbox.checked,
+                    user_name: currentUser,
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    onConflict: "task_id"
+                }
+            );
+
+        if (error) {
+            console.error("Could not save task progress:", error);
+        }
+
+        updateTaskLocks();
+    });
 
     const savedTask = localStorage.getItem(task.id);
 
@@ -241,6 +309,7 @@ tasks.forEach((task) => {
     taskElement.classList.add("completed");
     }
 });
+
 
 function updateTaskLocks() {
     tasks.forEach((task) => {
@@ -269,6 +338,40 @@ function updateTaskLocks() {
 }
 
 updateTaskLocks();
+
+async function loadTaskProgress() {
+    const { data, error } = await supabaseClient
+        .from("task_progress")
+        .select("task_id, completed");
+
+    if (error) {
+        console.error("Could not load task progress:", error);
+        return;
+    }
+
+    data.forEach((savedTask) => {
+        const checkbox = document.getElementById(
+            `${savedTask.task_id}-task`
+        );
+
+        if (!checkbox) {
+            return;
+        }
+
+        checkbox.checked = savedTask.completed;
+
+        const taskElement = checkbox.closest(".task");
+
+        taskElement.classList.toggle(
+            "completed",
+            savedTask.completed
+        );
+    });
+
+    updateTaskLocks();
+}
+
+loadTaskProgress();
 
 const survivalTitles = document.querySelectorAll(".survival-title");
 
@@ -342,4 +445,6 @@ function deleteDateIdea(index) {
 }
 
 displayDateIdeas();
+
+
     
