@@ -489,58 +489,77 @@ const dateIdeaInput = document.getElementById("date-idea-input");
 const addDateButton = document.getElementById("add-date-button");
 const dateIdeaList = document.getElementById("date-idea-list");
 
-let dateIdeas = JSON.parse(
-    localStorage.getItem("dateIdeas") || "[]"
-);
+async function loadDateIdeas() {
+    const { data, error } = await supabaseClient
+        .from("date_ideas")
+        .select("id, idea, created_by, created_at")
+        .order("created_at", { ascending: true });
 
-function displayDateIdeas() {
+    if (error) {
+        console.error("Could not load date ideas:", error);
+        return;
+    }
+
+    displayDateIdeas(data);
+}
+
+function displayDateIdeas(dateIdeas) {
     dateIdeaList.innerHTML = "";
 
-    dateIdeas.forEach((idea, index) => {
+    dateIdeas.forEach((dateIdea) => {
         const ideaElement = document.createElement("div");
 
         ideaElement.className = "date-idea";
 
         ideaElement.innerHTML = `
-            <span>💘 ${idea}</span>
-            <button onclick="deleteDateIdea(${index})">❌</button>
+            <span>💕 ${dateIdea.idea}</span>
+            <button onclick="deleteDateIdea(${dateIdea.id})">❌</button>
         `;
 
         dateIdeaList.appendChild(ideaElement);
     });
 }
 
-addDateButton.addEventListener("click", () => {
+addDateButton.addEventListener("click", async () => {
     const idea = dateIdeaInput.value.trim();
 
     if (idea === "") {
         return;
     }
 
-    dateIdeas.push(idea);
+    const currentUser = localStorage.getItem("currentUser");
 
-    localStorage.setItem(
-        "dateIdeas",
-        JSON.stringify(dateIdeas)
-    );
+    const { error } = await supabaseClient
+        .from("date_ideas")
+        .insert({
+            idea: idea,
+            created_by: currentUser
+        });
+
+    if (error) {
+        console.error("Could not save date idea:", error);
+        return;
+    }
 
     dateIdeaInput.value = "";
 
-    displayDateIdeas();
+    loadDateIdeas();
 });
 
-function deleteDateIdea(index) {
-    dateIdeas.splice(index, 1);
+async function deleteDateIdea(id) {
+    const { error } = await supabaseClient
+        .from("date_ideas")
+        .delete()
+        .eq("id", id);
 
-    localStorage.setItem(
-        "dateIdeas",
-        JSON.stringify(dateIdeas)
-    );
+    if (error) {
+        console.error("Could not delete date idea:", error);
+        return;
+    }
 
-    displayDateIdeas();
+    loadDateIdeas();
 }
 
-displayDateIdeas();
-
+loadDateIdeas();
 
     
