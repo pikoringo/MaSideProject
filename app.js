@@ -211,14 +211,33 @@ let currentCategory = "";
 tasks.forEach((task) => {
 
     if (task.category !== currentCategory) {
-        currentCategory = task.category;
+    currentCategory = task.category;
 
-        const categoryTitle = document.createElement("h2");
-        categoryTitle.className = "task-category";
-        categoryTitle.textContent = currentCategory;
+    const categoryTitle = document.createElement("h2");
+    categoryTitle.className = "task-category";
+    categoryTitle.textContent = currentCategory;
 
-        taskList.appendChild(categoryTitle);
+    taskList.appendChild(categoryTitle);
+
+    if (currentCategory === "Daily Setup") {
+        const dailyProgress = document.createElement("div");
+
+        dailyProgress.className = "progress-section";
+
+        dailyProgress.innerHTML = `
+            <div class="progress-header">
+                <strong>Daily Setup</strong>
+                <span id="daily-progress-text">0 / 4</span>
+            </div>
+
+            <div class="progress-bar">
+                <div id="daily-progress-fill"></div>
+            </div>
+        `;
+
+        taskList.appendChild(dailyProgress);
     }
+}
 
     const taskElement = document.createElement("div");
 
@@ -300,6 +319,8 @@ tasks.forEach((task) => {
         }
 
         updateTaskLocks();
+        updateArrivalProgress();
+        updateDailyProgress();
     });
 
     const savedTask = localStorage.getItem(task.id);
@@ -310,6 +331,9 @@ tasks.forEach((task) => {
     }
 });
 
+
+updateArrivalProgress();
+updateDailyProgress();
 
 function updateTaskLocks() {
     tasks.forEach((task) => {
@@ -338,6 +362,76 @@ function updateTaskLocks() {
 }
 
 updateTaskLocks();
+
+function updateArrivalProgress() {
+    const arrivalTasks = tasks.filter(
+        (task) => task.category === "Arrival & Registration"
+    );
+
+    let completedCount = 0;
+
+    arrivalTasks.forEach((task) => {
+        const checkbox = document.getElementById(`${task.id}-task`);
+
+        if (checkbox && checkbox.checked) {
+            completedCount++;
+        }
+    });
+
+    const totalCount = arrivalTasks.length;
+
+    const progressText =
+        document.getElementById("arrival-progress-text");
+
+    const progressFill =
+        document.getElementById("arrival-progress-fill");
+
+    if (!progressText || !progressFill) {
+        console.log("Arrival progress elements not found yet.");
+        return;
+    }
+
+    progressText.textContent =
+        `${completedCount} / ${totalCount}`;
+
+    progressFill.style.width =
+        `${(completedCount / totalCount) * 100}%`;
+}
+
+function updateDailyProgress() {
+    const dailyTasks = tasks.filter(
+        (task) => task.category === "Daily Setup"
+    );
+
+    let completedCount = 0;
+
+    dailyTasks.forEach((task) => {
+        const checkbox = document.getElementById(`${task.id}-task`);
+
+        if (checkbox && checkbox.checked) {
+            completedCount++;
+        }
+    });
+
+    const totalCount = dailyTasks.length;
+
+    const progressText =
+        document.getElementById("daily-progress-text");
+
+    const progressFill =
+        document.getElementById("daily-progress-fill");
+
+    if (!progressText || !progressFill) {
+        console.log("Daily progress elements not found yet.");
+        return;
+    }
+
+    progressText.textContent =
+        `${completedCount} / ${totalCount}`;
+
+    progressFill.style.width =
+        `${(completedCount / totalCount) * 100}%`;
+}
 
 async function loadTaskProgress() {
     const { data, error } = await supabaseClient
@@ -369,6 +463,8 @@ async function loadTaskProgress() {
     });
 
     updateTaskLocks();
+    updateArrivalProgress();
+    updateDailyProgress();
 }
 
 loadTaskProgress();

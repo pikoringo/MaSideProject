@@ -66,6 +66,12 @@ p {
     margin-bottom: 12px;
 }
 
+.character-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .character-card.selected {
     border-color: #e8a6b5;
 }
@@ -305,3 +311,45 @@ p {
     margin: 8px 0;
 }
 
+.progress-section {
+    background-color: white;
+    padding: 16px;
+    margin-top: 20px;
+    border-radius: 16px;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.progress-header span {
+    font-size: 14px;
+    color: #8a7b80;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #f0e7e9;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#arrival-progress-fill {
+    width: 0%;
+    height: 100%;
+    background-color: #e8a6b5;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+#daily-progress-fill {
+    width: 0%;
+    height: 100%;
+    background-color: #e8a6b5;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
