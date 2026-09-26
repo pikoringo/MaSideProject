@@ -353,3 +353,85 @@ p {
     border-radius: 10px;
     transition: width 0.3s ease;
 }
+
+.survival-heading {
+    margin-top: 30px;
+    margin-bottom: 14px;
+    font-size: 20px;
+    text-align: left;
+}
+
+.emergency-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.emergency-card {
+    background-color: white;
+    border-radius: 18px;
+    padding: 18px 12px;
+    text-align: center;
+}
+
+.emergency-card-wide {
+    grid-column: 1 / -1;
+}
+
+.emergency-number {
+    display: block;
+    font-size: 36px;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.emergency-label {
+    display: block;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.emergency-card p {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.garbage-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background-color: white;
+    padding: 18px;
+    border-radius: 18px;
+    text-decoration: none;
+    color: #3d3437;
+}
+
+.garbage-icon {
+    font-size: 32px;
+}
+
+.garbage-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 3px;
+}
+
+.garbage-text strong {
+    font-size: 18px;
+}
+
+.garbage-text small {
+    color: #8a7b80;
+    font-size: 12px;
+}
+
+.garbage-arrow {
+    font-size: 24px;
+    color: #b5a6aa;
+}
+.garbage-card + .garbage-card {
+    margin-top: 12px;
+}
