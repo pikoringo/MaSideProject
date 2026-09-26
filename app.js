@@ -97,37 +97,13 @@ const tasks = [
     {
         id: "address",
         name: "Register your address",
-        description: "Go to your city hall / ward office.",
+        description: "Bring you residence card and passport to the City Hall.",
         category: "Arrival & Registration",
         requires: [],
         details: {
-            what: "Register your address with your local city hall or ward office.",
-            where: "Maebashi City Hall",
+            what: "Register your address at City Hall.",
+            where: "Maebashi City Hall (Shiyakusho)",
             notes: "Get it printed on the back of your Residence Card."
-        }
-    },
-    {
-        id: "health-insurance",
-        name: "Apply for National Health Insurance",
-        description: "Apply at your city hall / ward office.",
-        category: "Arrival & Registration",
-        requires: ["address"],
-        details: {
-            what: "Apply for student health insurance.",
-            where: "Maebashi City Hall",
-            notes: "Might need Student ID or proof of enrollment."
-        }
-    },
-    {
-        id: "pension",
-        name: "Apply for Student National Pension Special Payment",
-        description: "Apply for 学生納付特例. You may need a student ID or certificate of enrollment.",
-        category: "Arrival & Registration",
-        requires: ["address"],
-        details: {
-            what: "Apply for Gakusei nōfu tokurei.",
-            where: "Maebashi City Hall",
-            notes: "Might need Student ID or proof of enrollment."
         }
     },
     {
@@ -139,19 +115,43 @@ const tasks = [
         details: {
             what: "Apply for MyNumber Card",
             where: "Maebashi City Hall",
-            notes: "Costs around 1000jpy."
+            notes: "Costs around 1000jpy, I think..."
+        }
+    },
+    {
+        id: "health-insurance",
+        name: "Apply for Student Health Insurance",
+        description: "Have student documents ready for this one.",
+        category: "Arrival & Registration",
+        requires: ["address"],
+        details: {
+            what: "Apply for student health insurance.",
+            where: "Maebashi City Hall",
+            notes: "Bring Student ID or proof of enrollment."
+        }
+    },
+    {
+        id: "pension",
+        name: "Apply for Student National Pension Special Payment",
+        description: "Have student documents ready for this one.",
+        category: "Arrival & Registration",
+        requires: ["address"],
+        details: {
+            what: "Apply for Gakusei nōfu tokurei.",
+            where: "Maebashi City Hall",
+            notes: "Bring student ID or proof of enrollment, and maybe even zaigaku shōmeisho."
         }
     },
     {
         id: "juminhyo",
-        name: "Get a Jūminhyō",
-        description: "Get a copy of your 住民票 if your school requires it.",
+        name: "Get a Residence Certificate (Jūminhyō)",
+        description: "Get a copy of your 住民票 for your school requirement.",
         category: "Arrival & Registration",
         requires: ["address"],
         details: {
             what: "Get Certificate of Residence",
             where: "Maebashi City Hall",
-            notes: "Can be printed from konbini with MyNumber Card. Otherwise, City Hall."
+            notes: "Can be printed from konbini with MyNumber Card. Otherwise, City Hall. They migt ask if you need menkyou on it, say no."
         }
     },
     {
