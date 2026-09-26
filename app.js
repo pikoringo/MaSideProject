@@ -103,7 +103,8 @@ const tasks = [
         details: {
             what: "Register your address at City Hall.",
             where: "Maebashi City Hall (Shiyakusho)",
-            notes: "Get it printed on the back of your Residence Card."
+            notes: "Get it printed on the back of your Residence Card.",
+            script: "Nihon ni kita bakari desu node, juusho toroku shitai desu."
         }
     },
     {
@@ -115,7 +116,8 @@ const tasks = [
         details: {
             what: "Apply for MyNumber Card",
             where: "Maebashi City Hall",
-            notes: "Costs around 1000jpy, I think..."
+            notes: "Costs around 1000jpy, I think...",
+            script: "Mai nambaa kaado hoshii desu."
         }
     },
     {
@@ -127,7 +129,8 @@ const tasks = [
         details: {
             what: "Apply for student health insurance.",
             where: "Maebashi City Hall",
-            notes: "Bring Student ID or proof of enrollment."
+            notes: "Bring Student ID or proof of enrollment.",
+            script: "Kenkou hoken ni hairitai desu. (say you are gakusei when asked)"
         }
     },
     {
@@ -139,7 +142,8 @@ const tasks = [
         details: {
             what: "Apply for Gakusei nōfu tokurei.",
             where: "Maebashi City Hall",
-            notes: "Bring student ID or proof of enrollment, and maybe even zaigaku shōmeisho."
+            notes: "Bring student ID or proof of enrollment, and maybe even zaigaku shōmeisho.",
+            script: "Nenkin ni hairitai desu. Gakusei menjo mo shinsei shitai desu."
         }
     },
     {
@@ -151,7 +155,8 @@ const tasks = [
         details: {
             what: "Get Certificate of Residence",
             where: "Maebashi City Hall",
-            notes: "Can be printed from konbini with MyNumber Card. Otherwise, City Hall. They migt ask if you need menkyou on it, say no."
+            notes: "Can be printed from konbini with MyNumber Card. Otherwise, City Hall. They migt ask if you need menkyou on it, say no.",
+            script: "Juminhyo hoshii desu."
         }
     },
     {
@@ -163,7 +168,8 @@ const tasks = [
         details: {
             what: "Get Japanese sim card",
             where: "DOCOMO - Keyaki Walk Maebashi",
-            notes: "I recommend Ahamo. Ask DoCoMo about it, they will give normal sim card, then you apply for Ahamo online."
+            notes: "I recommend Ahamo. Ask DoCoMo about it, they will give normal sim card, then you apply for Ahamo online.",
+            script: "Kaya mo na yan LMAO"
         }
     },
     {
@@ -175,7 +181,8 @@ const tasks = [
         details: {
             what: "Open Japanese bank account",
             where: "Japan Post Office",
-            notes: "Yuucho might be the easiest. Seven Bank is good but after 6months."
+            notes: "Yuucho might be the easiest. Seven Bank is good but after 6months.",
+            script: "Kaya mo na yan LMAO"
         }
     },
     {
@@ -187,7 +194,8 @@ const tasks = [
         details: {
             what: "Set up Paypay account.",
             where: "Online",
-            notes: "Might also need bank account."
+            notes: "Might also need bank account.",
+            script: "Bestie, please help"
         }
     },
     {
@@ -199,7 +207,8 @@ const tasks = [
         details: {
             what: "Apply for credit card",
             where: "Rakuten - Keyaki Walk",
-            notes: "Sometimes Rakuten is available on the 2nd floor. Better to apply in person than online."
+            notes: "Sometimes Rakuten is available on the 2nd floor. Better to apply in person than online.",
+            script: "Kaya mo na yan LMAO"
         }
     },
     {
@@ -211,7 +220,8 @@ const tasks = [
         details: {
             what: "Get and Register your Hanko (stamp)",
             where: "Get - anywhere. Register - City Hall",
-            notes: "Maybe your sensei will get you one. We can shop for one at Keyaki also."
+            notes: "Maybe your sensei will get you one. We can shop for one at Keyaki also.",
+            script: "Odagaki sensei, penge hanko"
         }
     }
 ];
@@ -271,6 +281,7 @@ tasks.forEach((task) => {
             <p><strong>What:</strong> ${task.details.what}</p>
             <p><strong>Where:</strong> ${task.details.where}</p>
             <p><strong>Notes:</strong> ${task.details.notes}</p>
+            <p><strong>Script:</strong> ${task.details.script}</p>
         </div>
     `;
 
