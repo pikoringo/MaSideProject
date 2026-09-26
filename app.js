@@ -201,6 +201,18 @@ const tasks = [
             where: "Rakuten - Keyaki Walk",
             notes: "Sometimes Rakuten is available on the 2nd floor. Better to apply in person than online."
         }
+    },
+    {
+        id: "hanko",
+        name: "Register your hanko (optional)",
+        description: "Not necessary, but good to have. I got mine from sensei.",
+        category: "Daily Setup",
+        requires: [],
+        details: {
+            what: "Get and Register your Hanko (stamp)",
+            where: "Get - anywhere. Register - City Hall",
+            notes: "Maybe your sensei will get you one. We can shop for one at Keyaki also."
+        }
     }
 ];
 
