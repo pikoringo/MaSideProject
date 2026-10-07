@@ -8,22 +8,21 @@ MaBestie is a personal, mobile-friendly web app built for its two users and cont
 
 ## Features
 
-- Two-person profile selection, remembered in the browser
-- Arrival and daily-setup checklists with prerequisite locking
-- Progress indicators for each checklist section
-- Expandable task notes and useful Japanese phrases
-- Emergency contacts and links to Maebashi's garbage guidance
-- Shared date ideas backed by Supabase
-- Local progress caching with `localStorage`
+- Remembered Rin or Julius profile selection
+- Independent Mono and Lilac profile themes
+- Categorized and filterable **The List** with item details and editing
+- Japan procedure checklist with prerequisite locking, progress, archiving, and restoring
+- Shared errand planning with assignments, due dates, and recurrence
+- Lightweight pet/avatar status updates
+- Quiet Accent interface with one consistent Lucide icon system
 
 ## Tech stack
 
-The app intentionally has no build step or package dependencies. It uses:
+The app intentionally has no build step. It uses:
 
 - HTML, CSS, and vanilla JavaScript
-- [Supabase JavaScript client v2](https://supabase.com/docs/reference/javascript/introduction), loaded from jsDelivr
-- Supabase tables for shared checklist progress and date ideas
-- Browser `localStorage` for the selected profile and a local copy of checklist state
+- [Lucide](https://lucide.dev/) for consistent interface icons, loaded from jsDelivr
+- Browser `localStorage` for the current V2 development milestone
 
 ## Run locally
 
@@ -37,35 +36,21 @@ python3 -m http.server 8000
 
 Then open [http://localhost:8000](http://localhost:8000).
 
-Opening `index.html` directly may work for basic UI development, but using a local server better matches a hosted environment. An internet connection is required to load the Supabase client and use shared data.
+Opening `index.html` directly may work for basic UI development, but using a local server better matches a hosted environment. An internet connection is required to load the Lucide icon library.
 
-## Supabase setup
+## V2 data status
 
-The current Supabase project URL and publishable key are defined at the top of `app.js`. Supabase publishable keys are designed for use in browser clients; data must still be protected with appropriate Row Level Security (RLS) policies.
+The first V2 milestone persists profiles, themes, statuses, list items, errands, and procedure state in browser `localStorage`. This makes the complete interface testable without changing the existing database.
 
-The frontend expects these tables:
+Cross-device sharing between Rin and Julius is not enabled yet. The next backend milestone will define and apply a Supabase schema for:
 
-### `task_progress`
+- Profiles and theme preferences
+- The List
+- Errands
+- Procedure progress and archives
+- Current pet/avatar statuses
 
-| Column | Expected type | Notes |
-| --- | --- | --- |
-| `task_id` | text | Unique key used by the checklist upsert |
-| `completed` | boolean | Completion state |
-| `user_name` | text | Profile that last changed the task |
-| `updated_at` | timestamp with time zone | Client-generated update time |
-
-The upsert in `app.js` uses `task_id` as its conflict target, so that column needs a unique or primary-key constraint.
-
-### `date_ideas`
-
-| Column | Expected type | Notes |
-| --- | --- | --- |
-| `id` | integer or bigint | Generated primary key |
-| `idea` | text | Date idea shown in the app |
-| `created_by` | text | Selected profile |
-| `created_at` | timestamp with time zone | Used to sort ideas; a database default is recommended |
-
-The browser client currently needs permission to select, insert, and update checklist progress and to select, insert, and delete date ideas. Review those permissions and the corresponding RLS policies before using the app with sensitive or public data.
+The app is intentionally private, but the character picker is not authentication. Database Row Level Security must be decided before cross-device sync is enabled.
 
 ## Project structure
 
@@ -73,19 +58,20 @@ The browser client currently needs permission to select, insert, and update chec
 .
 ├── index.html       # App markup and page sections
 ├── style.css        # Layout and visual styles
-├── app.js           # Navigation, checklist logic, and Supabase calls
+├── app.js           # V2 state, navigation, and feature logic
 ├── manifest.json    # Web app metadata
 ├── sw.js            # Reserved for future service-worker behavior
-└── images/          # Profile artwork and app icon
+├── images/          # Profile artwork and app icon
+├── docs/            # PRD and canonical design rules
+└── AGENTS.md        # Repository instructions for coding agents
 ```
 
 ## Data behavior
 
-- The selected profile is stored as `currentUser` in `localStorage`.
-- Each checklist item is also cached locally under its task ID.
-- On load, remote rows from `task_progress` are applied over the local checklist state.
-- Checklist rows are shared by `task_id`; they are not currently separated per profile.
-- Date ideas are shared, and the current UI allows any app user with database access to delete any idea.
+- The selected profile and all first-milestone V2 data are stored under `mabestie.v2` in `localStorage`.
+- Existing profile and procedure state is migrated where possible from the V1 keys.
+- Changing profiles changes identity and preferences without hiding shared local content.
+- Profile selection is a convenience, not an identity or access-control boundary.
 
 These details are important when changing the schema or tightening database access.
 
@@ -98,7 +84,7 @@ The evolving product requirements are documented in [docs/PRD.md](docs/PRD.md). 
 ## Known limitations
 
 - There is no authentication; the profile picker is a convenience, not an identity check.
-- Supabase errors are written to the browser console rather than shown in the UI.
+- Cross-device Supabase synchronization is not implemented in the first V2 milestone.
 - The service worker is empty, and the manifest is not yet wired into `index.html`, so the app should not be described as installable or offline-ready yet.
 - Automated tests and linting are not configured.
 

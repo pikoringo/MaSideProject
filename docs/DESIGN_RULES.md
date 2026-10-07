@@ -219,6 +219,9 @@ Use **Lucide** as the only interface icon family. Lucide's outline style matches
 | Recurring | `repeat-2` |
 | Assigned user | `user-round` |
 | Both users | `users-round` |
+| Profile theme | `palette` |
+| Pickup or parcel | `package` |
+| Return to profile selection | `log-out` |
 
 If a concept is not in this table, add it here before using a new icon.
 

@@ -2,235 +2,235 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#fafafa">
+    <meta name="description" content="A private companion app for Rin and Julius.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="images/MabestieApp.png" type="image/png">
     <link rel="apple-touch-icon" href="images/MabestieApp.png">
-    <title>MaBestie App</title>
-
     <link rel="stylesheet" href="style.css">
+    <title>MaBestie</title>
 </head>
-
 <body>
+    <main class="app-shell" id="app-shell" data-profile-theme="mono">
+        <section class="profile-gate" id="profile-gate" aria-labelledby="profile-gate-title">
+            <div class="brand-mark" aria-hidden="true">MB</div>
+            <p class="eyebrow">MaBestie</p>
+            <h1 id="profile-gate-title">Which character are you?</h1>
+            <p class="profile-gate-copy">Choose your profile to enter your shared space.</p>
 
-    <main class="app">
-
-        <section id="login-page">
-
-            <h1>Well hello there!</h1>
-
-            <p class="login-question">
-                ✨ Which bestie art thou? ✨
-            </p>
-
-            <div class="character-options">
-
-                <button class="character-card" type="button">
-                    <div class="character-placeholder">
-                        <img src="images/Mort.png" alt="Rin">
-                    </div>
-                    <strong>Rin</strong>
+            <div class="profile-options">
+                <button class="profile-option" type="button" data-select-profile="Rin">
+                    <img src="images/Mort.png" alt="">
+                    <span><strong>Rin</strong><small>Lilac theme</small></span>
+                    <i data-lucide="chevron-right" aria-hidden="true"></i>
                 </button>
-
-                <button class="character-card" type="button">
-                    <div class="character-placeholder">
-                        <img src="images/KingJulian.png" alt="Julius">
-                    </div>
-                    <strong>Julius</strong>
+                <button class="profile-option" type="button" data-select-profile="Julius">
+                    <img src="images/KingJulian.png" alt="">
+                    <span><strong>Julius</strong><small>Mono theme</small></span>
+                    <i data-lucide="chevron-right" aria-hidden="true"></i>
                 </button>
-
             </div>
-
         </section>
 
-        <section id="home-page">
-
-            <header>
-                <h1 id="home-title">Hello, Mabestie!</h1>
-                <p id="home-welcome">🌸 Welcome to Japan! 🌸</p>
+        <div class="app" id="app" hidden>
+            <header class="app-header">
+                <button class="profile-button" id="profile-button" type="button" data-open-screen="settings" aria-label="Open profile settings">
+                    <img id="header-avatar" src="images/Mort.png" alt="">
+                </button>
+                <div class="app-header-copy">
+                    <p class="eyebrow" id="header-eyebrow">Your shared space</p>
+                    <h1 id="screen-title">Home</h1>
+                </div>
             </header>
 
-            <section class="menu">
+            <div class="app-content" id="app-content">
+                <section class="screen" id="home-screen" data-screen="home" aria-labelledby="screen-title">
+                    <button class="partner-status card" id="partner-status-card" type="button" data-open-dialog="status-dialog">
+                        <span class="avatar-tile"><img id="partner-avatar" src="images/KingJulian.png" alt=""></span>
+                        <span class="partner-status-copy">
+                            <small id="partner-status-name">Julius · status</small>
+                            <strong id="partner-status-text">No status yet</strong>
+                            <span id="partner-status-time">Tap to set yours</span>
+                        </span>
+                        <i data-lucide="chevron-right" aria-hidden="true"></i>
+                    </button>
 
-                <button class="menu-card" id="procedures-button">
-                    <span class="menu-icon">🏛️</span>
+                    <div class="section-heading">
+                        <h2>Shared space</h2>
+                    </div>
+                    <div class="feature-grid">
+                        <button class="feature-card card" type="button" data-open-screen="list">
+                            <span class="feature-icon"><i data-lucide="list" aria-hidden="true"></i></span>
+                            <span><strong>The List</strong><small id="home-list-count">0 saved things</small></span>
+                        </button>
+                        <button class="feature-card card" type="button" data-open-screen="errands">
+                            <span class="feature-icon"><i data-lucide="shopping-basket" aria-hidden="true"></i></span>
+                            <span><strong>Errands</strong><small id="home-errand-count">0 open</small></span>
+                        </button>
+                        <button class="feature-card card" id="home-procedures-card" type="button" data-open-screen="procedures">
+                            <span class="feature-icon"><i data-lucide="landmark" aria-hidden="true"></i></span>
+                            <span><strong>Japan</strong><small id="home-procedure-count">0 of 10 complete</small></span>
+                        </button>
+                        <button class="feature-card card" type="button" data-open-screen="settings">
+                            <span class="feature-icon"><i data-lucide="settings" aria-hidden="true"></i></span>
+                            <span><strong>Settings</strong><small>Profile, theme & archive</small></span>
+                        </button>
+                    </div>
+                </section>
 
-                    <span class="menu-text">
-                        <strong>Japan Procedures</strong>
-                        <small>Government & arrival checklist</small>
-                    </span>
+                <section class="screen" id="list-screen" data-screen="list" hidden>
+                    <div class="filter-row" id="list-filters" role="group" aria-label="Filter The List">
+                        <button class="filter-chip" type="button" data-list-filter="all" aria-pressed="true">All</button>
+                        <button class="filter-chip" type="button" data-list-filter="movies" aria-pressed="false"><i data-lucide="clapperboard" aria-hidden="true"></i>Movies</button>
+                        <button class="filter-chip" type="button" data-list-filter="places" aria-pressed="false"><i data-lucide="map-pin" aria-hidden="true"></i>Places</button>
+                        <button class="filter-chip" type="button" data-list-filter="food" aria-pressed="false"><i data-lucide="utensils" aria-hidden="true"></i>Food</button>
+                        <button class="filter-chip" type="button" data-list-filter="wishlist" aria-pressed="false"><i data-lucide="gift" aria-hidden="true"></i>Wishlist</button>
+                    </div>
+                    <div class="section-heading">
+                        <h2 id="list-section-title">Everything</h2>
+                        <span id="list-visible-count">0 items</span>
+                    </div>
+                    <div class="item-list" id="list-items"></div>
+                    <div class="empty-state" id="list-empty" hidden>
+                        <i data-lucide="list" aria-hidden="true"></i>
+                        <h2>Nothing here yet</h2>
+                        <p>Add something you want to watch, visit, eat, or buy together.</p>
+                    </div>
+                    <button class="primary-button block-button" id="add-list-item-button" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add to The List</button>
+                </section>
 
-                    <span class="arrow">›</span>
-                </button>
+                <section class="screen" id="procedures-screen" data-screen="procedures" hidden>
+                    <div class="progress-card card">
+                        <div class="progress-copy"><span>Overall progress</span><strong id="procedure-progress-text">0 / 10</strong></div>
+                        <div class="progress-track" role="progressbar" aria-label="Japan procedures progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="procedure-progress"><span id="procedure-progress-fill"></span></div>
+                        <p id="procedure-progress-note">Complete each step to unlock archiving.</p>
+                    </div>
+                    <div id="procedure-groups"></div>
+                    <button class="secondary-button block-button" id="archive-procedures-button" type="button" disabled><i data-lucide="archive" aria-hidden="true"></i>Archive completed list</button>
+                </section>
 
-                <button class="menu-card" id="survival-button">
-                    <span class="menu-icon">⚔️</span>
+                <section class="screen" id="errands-screen" data-screen="errands" hidden>
+                    <div class="summary-row" aria-label="Errand summary">
+                        <div class="summary-card card"><strong id="errands-open-count">0</strong><span>Open</span></div>
+                        <div class="summary-card card"><strong id="errands-due-count">0</strong><span>Today</span></div>
+                        <div class="summary-card card"><strong id="errands-recurring-count">0</strong><span>Recurring</span></div>
+                    </div>
+                    <div class="filter-row" id="errand-filters" role="group" aria-label="Filter errands">
+                        <button class="filter-chip" type="button" data-errand-filter="all" aria-pressed="true">All</button>
+                        <button class="filter-chip" type="button" data-errand-filter="groceries" aria-pressed="false">Groceries</button>
+                        <button class="filter-chip" type="button" data-errand-filter="pickup" aria-pressed="false">Pickup</button>
+                        <button class="filter-chip" type="button" data-errand-filter="home" aria-pressed="false">Home</button>
+                        <button class="filter-chip" type="button" data-errand-filter="admin" aria-pressed="false">Admin</button>
+                    </div>
+                    <div class="item-list" id="errand-items"></div>
+                    <div class="empty-state" id="errands-empty" hidden>
+                        <i data-lucide="shopping-basket" aria-hidden="true"></i>
+                        <h2>No open errands</h2>
+                        <p>You are all caught up.</p>
+                    </div>
+                    <button class="primary-button block-button" id="add-errand-button" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add an errand</button>
+                </section>
 
-                    <span class="menu-text">
-                        <strong>Survival Guide</strong>
-                        <small>Emergency numbers & useful information</small>
-                    </span>
+                <section class="screen" id="settings-screen" data-screen="settings" hidden>
+                    <section class="settings-section card">
+                        <div class="settings-heading"><span class="feature-icon"><i data-lucide="user-round" aria-hidden="true"></i></span><div><h2>Profile</h2><p>Change the active character on this device.</p></div></div>
+                        <div class="segmented-control" role="group" aria-label="Active profile">
+                            <button type="button" data-settings-profile="Rin" aria-pressed="false">Rin</button>
+                            <button type="button" data-settings-profile="Julius" aria-pressed="false">Julius</button>
+                        </div>
+                    </section>
 
-                    <span class="arrow">›</span>
-                </button>
+                    <section class="settings-section card">
+                        <div class="settings-heading"><span class="feature-icon"><i data-lucide="palette" aria-hidden="true"></i></span><div><h2>Theme</h2><p>Each profile keeps its own preference.</p></div></div>
+                        <div class="theme-options" role="group" aria-label="Profile theme">
+                            <button class="theme-option" type="button" data-theme-option="mono" aria-pressed="false"><span class="theme-swatch mono-swatch"></span><span><strong>Mono</strong><small>Black, white & graphite</small></span></button>
+                            <button class="theme-option" type="button" data-theme-option="lilac" aria-pressed="false"><span class="theme-swatch lilac-swatch"></span><span><strong>Lilac</strong><small>Neutral with quiet color</small></span></button>
+                        </div>
+                    </section>
 
-                <button class="menu-card" id="dates-button">
-                    <span class="menu-icon">💕</span>
+                    <section class="settings-section card">
+                        <div class="settings-heading"><span class="feature-icon"><i data-lucide="archive" aria-hidden="true"></i></span><div><h2>Archived lists</h2><p>Restore a completed chapter anytime.</p></div></div>
+                        <p class="muted-copy" id="archive-empty-message">No archived lists.</p>
+                        <div class="archive-item" id="archived-procedures-item" hidden>
+                            <span><strong>Japan procedures</strong><small id="archive-date">Archived recently</small></span>
+                            <button class="secondary-button" id="restore-procedures-button" type="button"><i data-lucide="archive-restore" aria-hidden="true"></i>Restore</button>
+                        </div>
+                    </section>
 
-                    <span class="menu-text">
-                        <strong>Date Ideas</strong>
-                        <small>Things we want to do together</small>
-                    </span>
-
-                    <span class="arrow">›</span>
-                </button>
-
-            </section>
-
-            <div class="home-message">
-                <p>
-                    Hello, maloveski! 🌸
-                </p>
-
-                <p>
-                    As you already know, this MaBestieApp.v1<br>
-                    is a side project I've been doing to get<br>
-                    familiar with Javascript. Most of your<br>
-                    arrival checklist has to be done during<br>
-                    the weekday while I am at work, so I hope<br>
-                    this app could be my proxy for a while.<br>
-                    I'm sorry I can't come with you 🥺
-                </p>
-
-                <p>
-                    I included some emergency contact and<br>
-                    garbage collection information, just in<br>
-                    case! Let me know if you neeed me to take<br>
-                    a leave, I still have 2.5 left!
-                </p>
-
-                <p>
-                    I hope you find this app helpful in some way!<br>
-                    Made with love, Rin 
-                </p>
+                    <button class="secondary-button block-button" id="forget-profile-button" type="button"><i data-lucide="log-out" aria-hidden="true"></i>Return to character selection</button>
+                </section>
             </div>
-        </section>
 
+            <nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
+                <button type="button" data-nav-screen="home" aria-selected="true"><i data-lucide="house" aria-hidden="true"></i><span>Home</span></button>
+                <button type="button" data-nav-screen="list" aria-selected="false"><i data-lucide="list" aria-hidden="true"></i><span>The List</span></button>
+                <button type="button" id="procedures-nav-button" data-nav-screen="procedures" aria-selected="false"><i data-lucide="landmark" aria-hidden="true"></i><span>Japan</span></button>
+                <button type="button" data-nav-screen="errands" aria-selected="false"><i data-lucide="shopping-basket" aria-hidden="true"></i><span>Errands</span></button>
+                <button type="button" data-nav-screen="settings" aria-selected="false"><i data-lucide="settings" aria-hidden="true"></i><span>Settings</span></button>
+            </nav>
+        </div>
     </main>
 
-    <section id="procedures-page" class="page">
+    <dialog id="list-item-dialog" class="app-dialog">
+        <form method="dialog" id="list-item-form">
+            <div class="dialog-header"><div><p class="eyebrow">The List</p><h2 id="list-dialog-title">Add an item</h2></div><button class="icon-button" type="button" data-close-dialog="list-item-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
+            <input type="hidden" id="list-item-id">
+            <label class="field-label" for="list-item-category">Category</label>
+            <select id="list-item-category" required><option value="movies">Movies</option><option value="places">Places to go</option><option value="food">Food to eat</option><option value="wishlist">Wishlist</option></select>
+            <label class="field-label" for="list-item-title">Title</label>
+            <input id="list-item-title" type="text" maxlength="100" required>
+            <label class="field-label" for="list-item-description">Description</label>
+            <textarea id="list-item-description" rows="4" maxlength="500" placeholder="Add the details you want to remember."></textarea>
+            <div class="dialog-actions"><button class="danger-button" id="delete-list-item-button" type="button"><i data-lucide="trash-2" aria-hidden="true"></i>Delete</button><button class="primary-button" type="submit"><i data-lucide="check" aria-hidden="true"></i>Save</button></div>
+        </form>
+    </dialog>
 
-        <button id="procedures-back-button" class="home-button" aria-label="Home">≪</button>
-
-        <h1>🏛️ Japan Procedures</h1>
-
-        <p>Things to take care of after arriving in Japan.</p>
-
-        <div class="progress-section">
-            <div class="progress-header">
-                <strong>Arrival & Registration</strong>
-                <span id="arrival-progress-text">0 / 5</span>
+    <dialog id="errand-dialog" class="app-dialog">
+        <form method="dialog" id="errand-form">
+            <div class="dialog-header"><div><p class="eyebrow">Errands</p><h2 id="errand-dialog-title">Add an errand</h2></div><button class="icon-button" type="button" data-close-dialog="errand-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
+            <input type="hidden" id="errand-id">
+            <label class="field-label" for="errand-title">Title</label>
+            <input id="errand-title" type="text" maxlength="100" required>
+            <label class="field-label" for="errand-category">Category</label>
+            <select id="errand-category" required><option value="groceries">Groceries</option><option value="pickup">Pickup & returns</option><option value="home">Home</option><option value="admin">Admin</option></select>
+            <div class="field-grid">
+                <div><label class="field-label" for="errand-assignee">Assignee</label><select id="errand-assignee"><option value="unassigned">Unassigned</option><option value="Rin">Rin</option><option value="Julius">Julius</option><option value="both">Both</option></select></div>
+                <div><label class="field-label" for="errand-due-date">Due date</label><input id="errand-due-date" type="date"></div>
             </div>
+            <label class="field-label" for="errand-recurrence">Repeats</label>
+            <select id="errand-recurrence"><option value="">Does not repeat</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+            <label class="field-label" for="errand-notes">Notes</label>
+            <textarea id="errand-notes" rows="3" maxlength="500"></textarea>
+            <div class="dialog-actions"><button class="danger-button" id="delete-errand-button" type="button"><i data-lucide="trash-2" aria-hidden="true"></i>Delete</button><button class="primary-button" type="submit"><i data-lucide="check" aria-hidden="true"></i>Save</button></div>
+        </form>
+    </dialog>
 
-            <div class="progress-bar">
-                <div id="arrival-progress-fill"></div>
+    <dialog id="status-dialog" class="app-dialog">
+        <form method="dialog" id="status-form">
+            <div class="dialog-header"><div><p class="eyebrow">Pet status</p><h2>Set your status</h2></div><button class="icon-button" type="button" data-close-dialog="status-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
+            <div class="status-options" id="status-options" role="group" aria-label="Status">
+                <button type="button" data-status="At work">At work</button>
+                <button type="button" data-status="Studying">Studying</button>
+                <button type="button" data-status="On my way">On my way</button>
+                <button type="button" data-status="Resting">Resting</button>
+                <button type="button" data-status="Need a hug">Need a hug</button>
             </div>
-        </div>
+            <label class="field-label" for="status-message">Short message</label>
+            <input id="status-message" type="text" maxlength="80" placeholder="Optional">
+            <button class="primary-button block-button" type="submit"><i data-lucide="paw-print" aria-hidden="true"></i>Update status</button>
+        </form>
+    </dialog>
 
-        <div id="task-list"></div>
+    <dialog id="archive-dialog" class="app-dialog confirmation-dialog">
+        <form method="dialog">
+            <div class="dialog-header"><div><p class="eyebrow">Completed chapter</p><h2>Archive Japan procedures?</h2></div><button class="icon-button" type="button" data-close-dialog="archive-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
+            <p>The completed list will move to Settings, and Japan will disappear from the footer. You can restore it anytime.</p>
+            <div class="dialog-actions"><button class="secondary-button" type="button" data-close-dialog="archive-dialog">Not yet</button><button class="primary-button" id="confirm-archive-button" type="button"><i data-lucide="archive" aria-hidden="true"></i>Archive</button></div>
+        </form>
+    </dialog>
 
-    </section>
-
-   <section id="survival-page" class="page">
-    <button id="survival-back-button" class="home-button" aria-label="Home">≪</button>
-
-    <h1>⚔️Survival</h1>
-
-    <p>Information you should remember.</p>
-
-    <h2 class="survival-heading">🚨 Emergency Numbers</h2>
-
-    <div class="emergency-grid">
-
-        <div class="emergency-card">
-            <strong class="emergency-number">110</strong>
-            <span class="emergency-label">For the po-po</span>
-            <p>Police emergencies</p>
-        </div>
-
-        <div class="emergency-card">
-            <strong class="emergency-number">119</strong>
-            <span class="emergency-label">Fire / Ambulance</span>
-            <p>Fire, serious illness<br>or injury</p>
-        </div>
-
-        <div class="emergency-card emergency-card-wide">
-            <strong class="emergency-number">118</strong>
-            <span class="emergency-label">Coast Guard</span>
-            <p>Emergencies at sea<br>I would probably drown</p>
-        </div>
-
-    </div>
-
-    <h2 class="survival-heading">🗑️ Garbage Disposal</h2>
-
-    <a
-        class="garbage-card"
-        href="https://www.city.maebashi.gunma.jp/soshiki/kankyo/gomiseisaku/oshirase/2604.html"
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-        <span class="garbage-icon">♻️</span>
-
-        <span class="garbage-text">
-            <strong>さんあ〜る</strong>
-            <small>Maebashi Garbage Guide</small>
-            <small>Garbage sorting & collection information</small>
-        </span>
-
-        <span class="garbage-arrow">↗</span>
-    </a>
-
-    <a
-        class="garbage-card"
-        href="https://apps.apple.com/jp/app/%E3%81%94%E3%81%BF%E5%88%86%E5%88%A5%E3%82%A2%E3%83%97%E3%83%AA-%E3%81%95%E3%82%93%E3%81%82-%E3%82%8B/id977071564"
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-        <span class="garbage-icon">📱</span>
-
-        <span class="garbage-text">
-            <strong>Download さんあ〜る App</strong>
-            <small>App Store</small>
-        </span>
-
-        <span class="garbage-arrow">↗</span>
-    </a>
-
-</section>
-
-    <section id="dates-page" class="page">
-        <button id="dates-back-button" class="home-button" aria-label="Home">≪</button>
-
-        <h1>Date Ideas</h1>
-
-        <p>Places and things we want to do together.</p>
-
-        <div class="date-input">
-            <input
-                type="text"
-                id="date-idea-input"
-                placeholder="e.g. Visit a cat cafe 🐱"
-            >
-
-            <button id="add-date-button">Add</button>
-        </div>
-
-        <div id="date-idea-list"></div>
-
-    </section>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="app.js"></script>
-
 </body>
 </html>
