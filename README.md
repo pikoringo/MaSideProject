@@ -1,6 +1,8 @@
 # MaBestie
 
-MaBestie is a small, mobile-friendly web app for helping a newly arrived resident get settled in Japan. It combines an arrival checklist, practical emergency and garbage-disposal information, and a shared list of date ideas.
+MaBestie is a personal, mobile-friendly web app built for its two users and contributors. It helps one of them get settled in Japan through an arrival checklist, practical emergency and garbage-disposal information, and shared plans.
+
+> **Project scope:** MaBestie is currently a private two-person project, not a public-facing service or general-purpose Japan guide. It may grow into something broader in the future, but the present design and data model intentionally focus on its two users.
 
 <img src="images/MabestieApp.png" alt="MaBestie app icon" width="160">
 
@@ -90,6 +92,8 @@ These details are important when changing the schema or tightening database acce
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, conventions, and pre-commit checks.
+
+The evolving product requirements are documented in [docs/PRD.md](docs/PRD.md). UI work must follow the canonical [Quiet Accent design rules](docs/DESIGN_RULES.md).
 
 ## Known limitations
 
