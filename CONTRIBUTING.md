@@ -55,6 +55,8 @@ There is no automated test suite yet. Before opening a pull request, verify the 
 - Errands support adding, editing, deleting, completing, assignments, due dates, and recurrence.
 - Each profile can set its own status, and the partner's latest status appears on Home.
 - All first-milestone data remains correct after a refresh.
+- With the V2 Supabase migration applied, a change in one browser appears in another and the header reports **Shared & current**.
+- With Supabase unavailable, cached data remains usable and the header reports a local or pending state.
 - The layout remains usable at 320px and at wider desktop sizes.
 - Navigation, feature, category, and action icons follow `docs/DESIGN_RULES.md`.
 

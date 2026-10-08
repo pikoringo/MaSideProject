@@ -22,7 +22,8 @@ The app intentionally has no build step. It uses:
 
 - HTML, CSS, and vanilla JavaScript
 - [Lucide](https://lucide.dev/) for consistent interface icons, loaded from jsDelivr
-- Browser `localStorage` for the current V2 development milestone
+- [Supabase](https://supabase.com/) for shared Postgres data and Realtime updates
+- Browser `localStorage` as the immediate offline cache
 
 ## Run locally
 
@@ -38,19 +39,20 @@ Then open [http://localhost:8000](http://localhost:8000).
 
 Opening `index.html` directly may work for basic UI development, but using a local server better matches a hosted environment. An internet connection is required to load the Lucide icon library.
 
-## V2 data status
+## V2 shared data
 
-The first V2 milestone persists profiles, themes, statuses, list items, errands, and procedure state in browser `localStorage`. This makes the complete interface testable without changing the existing database.
+V2 connects both users to one Supabase database. Profiles, themes, statuses, list items, errands, and procedure state are shared, while `localStorage` keeps a device cache so the interface can still open when the network is unavailable.
 
-Cross-device sharing between Rin and Julius is not enabled yet. The next backend milestone will define and apply a Supabase schema for:
+Before the first shared run, apply the included database migration by following [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Until the migration exists in the remote project, the header displays **Setup needed** and edits remain local.
 
-- Profiles and theme preferences
-- The List
-- Errands
-- Procedure progress and archives
-- Current pet/avatar statuses
+When connected:
 
-The app is intentionally private, but the character picker is not authentication. Database Row Level Security must be decided before cross-device sync is enabled.
+- One user's changes are stored in Supabase and appear on the other user's open app through Realtime.
+- Empty cloud collections are initialized once from the first device's local cache.
+- Archiving changes the shared Japan list state; it does not delete its checklist progress.
+- A failed write remains in the local cache and is labeled **Changes pending**.
+
+The character picker is not authentication. Current Row Level Security policies deliberately allow unauthenticated access so the two-person prototype can work without accounts. This is convenient, but it is not secure access control; see the setup guide before storing sensitive information.
 
 ## Project structure
 
@@ -63,12 +65,14 @@ The app is intentionally private, but the character picker is not authentication
 ├── sw.js            # Reserved for future service-worker behavior
 ├── images/          # Profile artwork and app icon
 ├── docs/            # PRD and canonical design rules
+├── supabase/         # Reproducible database migrations
 └── AGENTS.md        # Repository instructions for coding agents
 ```
 
 ## Data behavior
 
-- The selected profile and all first-milestone V2 data are stored under `mabestie.v2` in `localStorage`.
+- The selected profile and cached V2 data are stored under `mabestie.v2` in `localStorage`.
+- Shared product data is stored in Supabase after the V2 migration is applied.
 - Existing profile and procedure state is migrated where possible from the V1 keys.
 - Changing profiles changes identity and preferences without hiding shared local content.
 - Profile selection is a convenience, not an identity or access-control boundary.
@@ -83,9 +87,9 @@ The evolving product requirements are documented in [docs/PRD.md](docs/PRD.md). 
 
 ## Known limitations
 
-- There is no authentication; the profile picker is a convenience, not an identity check.
-- Cross-device Supabase synchronization is not implemented in the first V2 milestone.
-- The service worker is empty, and the manifest is not yet wired into `index.html`, so the app should not be described as installable or offline-ready yet.
+- There is no authentication; the profile picker is a convenience, not an identity check, and the current database policy is not securely private.
+- The service worker is empty, so cached data does not make every app asset available offline.
+- Failed cloud writes stay in the local cache but are not automatically replayed after reconnecting yet.
 - Automated tests and linting are not configured.
 
 ## License

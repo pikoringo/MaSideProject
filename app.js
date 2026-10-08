@@ -1,4 +1,11 @@
 const STORAGE_KEY = "mabestie.v2";
+const SUPABASE_URL = "https://yxogvfsgfekipibthjxs.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_DFh8lrv4AZtbwQLQkOCX-A_bIV7DVxS";
+const PROCEDURE_LIST_ID = "japan-arrival";
+
+const cloud = globalThis.supabase?.createClient
+    ? globalThis.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+    : null;
 
 const PROFILE_META = {
     Rin: {
@@ -218,6 +225,8 @@ let currentScreen = "home";
 let listFilter = "all";
 let errandFilter = "all";
 let selectedStatus = "";
+let cloudRefreshTimer = null;
+let cloudChannel = null;
 
 const appShell = document.getElementById("app-shell");
 const profileGate = document.getElementById("profile-gate");
@@ -225,9 +234,193 @@ const app = document.getElementById("app");
 const screenTitle = document.getElementById("screen-title");
 const headerEyebrow = document.getElementById("header-eyebrow");
 const headerAvatar = document.getElementById("header-avatar");
+const syncStatus = document.getElementById("sync-status");
 
 function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function setSyncStatus(label, status = "") {
+    syncStatus.textContent = label;
+    syncStatus.dataset.state = status;
+}
+
+function fromListRow(row) {
+    return {
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        description: row.description || "",
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+    };
+}
+
+function toListRow(item) {
+    return {
+        id: item.id,
+        title: item.title,
+        category: item.category,
+        description: item.description || "",
+        created_by: item.createdBy || state.currentUser,
+        created_at: item.createdAt || new Date().toISOString()
+    };
+}
+
+function fromErrandRow(row) {
+    return {
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        assignee: row.assignee,
+        dueDate: row.due_date || "",
+        recurrence: row.recurrence || "",
+        notes: row.notes || "",
+        completed: row.completed,
+        createdBy: row.created_by,
+        completedBy: row.completed_by,
+        completedAt: row.completed_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+    };
+}
+
+function toErrandRow(errand) {
+    return {
+        id: errand.id,
+        title: errand.title,
+        category: errand.category,
+        assignee: errand.assignee || "unassigned",
+        due_date: errand.dueDate || null,
+        recurrence: errand.recurrence || "",
+        notes: errand.notes || "",
+        completed: Boolean(errand.completed),
+        created_by: errand.createdBy || state.currentUser,
+        completed_by: errand.completed ? (errand.completedBy || state.currentUser) : null,
+        completed_at: errand.completed ? (errand.completedAt || new Date().toISOString()) : null,
+        created_at: errand.createdAt || new Date().toISOString()
+    };
+}
+
+async function querySharedState() {
+    const [profilesResult, listResult, procedureListResult, progressResult, errandsResult] = await Promise.all([
+        cloud.from("profiles").select("*"),
+        cloud.from("list_items").select("*").order("created_at"),
+        cloud.from("procedure_lists").select("*").eq("id", PROCEDURE_LIST_ID).single(),
+        cloud.from("procedure_progress").select("*").eq("list_id", PROCEDURE_LIST_ID),
+        cloud.from("errands").select("*").order("created_at")
+    ]);
+    const error = [profilesResult, listResult, procedureListResult, progressResult, errandsResult]
+        .find((result) => result.error)?.error;
+    if (error) throw error;
+    return {
+        profiles: profilesResult.data,
+        listItems: listResult.data,
+        procedureList: procedureListResult.data,
+        progress: progressResult.data,
+        errands: errandsResult.data
+    };
+}
+
+async function initializeEmptyCollections(remote) {
+    const writes = [];
+    if (!remote.listItems.length && state.listItems.length) {
+        writes.push(cloud.from("list_items").upsert(state.listItems.map(toListRow)));
+    }
+    if (!remote.errands.length && state.errands.length) {
+        writes.push(cloud.from("errands").upsert(state.errands.map(toErrandRow)));
+    }
+    if (!remote.progress.length) {
+        const completedRows = Object.entries(state.procedureProgress)
+            .filter(([, completed]) => completed)
+            .map(([taskId]) => ({ list_id: PROCEDURE_LIST_ID, task_id: taskId, completed: true, completed_by: state.currentUser }));
+        if (completedRows.length) writes.push(cloud.from("procedure_progress").upsert(completedRows));
+    }
+    const results = await Promise.all(writes);
+    const error = results.find((result) => result.error)?.error;
+    if (error) throw error;
+    return writes.length > 0;
+}
+
+function applySharedState(remote) {
+    remote.profiles.forEach((profile) => {
+        state.themes[profile.name] = profile.theme;
+        state.statuses[profile.name] = {
+            value: profile.status || "",
+            message: profile.status_message || "",
+            updatedAt: profile.status_updated_at
+        };
+    });
+    state.listItems = remote.listItems.map(fromListRow);
+    state.errands = remote.errands.map(fromErrandRow);
+    state.procedureProgress = Object.fromEntries(PROCEDURES.map((procedure) => [procedure.id, false]));
+    remote.progress.forEach((row) => {
+        if (Object.hasOwn(state.procedureProgress, row.task_id)) state.procedureProgress[row.task_id] = row.completed;
+    });
+    state.proceduresArchived = remote.procedureList.archived;
+    state.proceduresArchivedAt = remote.procedureList.archived_at;
+    saveState();
+    if (state.currentUser) {
+        renderAll();
+        if (state.proceduresArchived && currentScreen === "procedures") navigate("home");
+    }
+}
+
+async function refreshFromCloud() {
+    if (!cloud) return;
+    setSyncStatus("Syncing…");
+    try {
+        let remote = await querySharedState();
+        const initialized = await initializeEmptyCollections(remote);
+        if (initialized) remote = await querySharedState();
+        applySharedState(remote);
+        setSyncStatus("Shared & current", "synced");
+    } catch (error) {
+        setSyncStatus(error?.code === "PGRST205" ? "Setup needed" : "Local only", "pending");
+        console.warn("MaBestie cloud sync is unavailable; using the local cache.", error);
+    }
+}
+
+function scheduleCloudRefresh() {
+    clearTimeout(cloudRefreshTimer);
+    cloudRefreshTimer = setTimeout(refreshFromCloud, 250);
+}
+
+function subscribeToCloud() {
+    if (!cloud || cloudChannel) return;
+    cloudChannel = cloud.channel("mabestie-v2");
+    ["profiles", "list_items", "procedure_lists", "procedure_progress", "errands"].forEach((table) => {
+        cloudChannel.on("postgres_changes", { event: "*", schema: "public", table }, scheduleCloudRefresh);
+    });
+    cloudChannel.subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setSyncStatus("Local only", "pending");
+    });
+}
+
+async function writeToCloud(operation) {
+    if (!cloud) return;
+    setSyncStatus("Saving…");
+    try {
+        const { error } = await operation;
+        if (error) throw error;
+        setSyncStatus("Shared & current", "synced");
+    } catch (error) {
+        setSyncStatus("Changes pending", "pending");
+        console.warn("The change is saved locally but has not reached Supabase.", error);
+    }
+}
+
+function syncProfile(profile) {
+    if (!cloud) return;
+    const status = state.statuses[profile] || {};
+    return writeToCloud(cloud.from("profiles").upsert({
+        name: profile,
+        theme: state.themes[profile] || PROFILE_META[profile].defaultTheme,
+        status: status.value || "",
+        status_message: status.message || "",
+        status_updated_at: status.updatedAt || null
+    }));
 }
 
 function refreshIcons() {
@@ -405,20 +598,24 @@ function saveListItem() {
         description: document.getElementById("list-item-description").value.trim()
     };
 
+    let savedItem;
     if (existing) {
         Object.assign(existing, values, { updatedAt: new Date().toISOString() });
+        savedItem = existing;
     } else {
-        state.listItems.push({
+        savedItem = {
             id: makeId(),
             ...values,
             createdBy: state.currentUser,
             createdAt: new Date().toISOString()
-        });
+        };
+        state.listItems.push(savedItem);
     }
 
     saveState();
     document.getElementById("list-item-dialog").close();
     renderAll();
+    if (cloud) writeToCloud(cloud.from("list_items").upsert(toListRow(savedItem)));
 }
 
 function deleteListItem() {
@@ -427,6 +624,7 @@ function deleteListItem() {
     saveState();
     document.getElementById("list-item-dialog").close();
     renderAll();
+    if (cloud) writeToCloud(cloud.from("list_items").delete().eq("id", id));
 }
 
 function renderProcedures() {
@@ -485,6 +683,12 @@ function createProcedureElement(procedure) {
         state.procedureProgress[procedure.id] = checkbox.checked;
         saveState();
         renderAll();
+        if (cloud) writeToCloud(cloud.from("procedure_progress").upsert({
+            list_id: PROCEDURE_LIST_ID,
+            task_id: procedure.id,
+            completed: checkbox.checked,
+            completed_by: checkbox.checked ? state.currentUser : null
+        }));
     });
 
     const copy = document.createElement("span");
@@ -530,6 +734,10 @@ function archiveProcedures() {
     document.getElementById("archive-dialog").close();
     renderAll();
     navigate("settings");
+    if (cloud) writeToCloud(cloud.from("procedure_lists").update({
+        archived: true,
+        archived_at: state.proceduresArchivedAt
+    }).eq("id", PROCEDURE_LIST_ID));
 }
 
 function restoreProcedures() {
@@ -538,6 +746,7 @@ function restoreProcedures() {
     saveState();
     renderAll();
     navigate("procedures");
+    if (cloud) writeToCloud(cloud.from("procedure_lists").update({ archived: false, archived_at: null }).eq("id", PROCEDURE_LIST_ID));
 }
 
 function renderErrands() {
@@ -560,8 +769,11 @@ function renderErrands() {
         if (errand.completed) check.appendChild(icon("check"));
         check.addEventListener("click", () => {
             errand.completed = !errand.completed;
+            errand.completedBy = errand.completed ? state.currentUser : null;
+            errand.completedAt = errand.completed ? new Date().toISOString() : null;
             saveState();
             renderAll();
+            if (cloud) writeToCloud(cloud.from("errands").upsert(toErrandRow(errand)));
         });
 
         const copyButton = document.createElement("button");
@@ -634,21 +846,25 @@ function saveErrand() {
         notes: document.getElementById("errand-notes").value.trim()
     };
 
+    let savedErrand;
     if (existing) {
         Object.assign(existing, values, { updatedAt: new Date().toISOString() });
+        savedErrand = existing;
     } else {
-        state.errands.push({
+        savedErrand = {
             id: makeId(),
             ...values,
             completed: false,
             createdBy: state.currentUser,
             createdAt: new Date().toISOString()
-        });
+        };
+        state.errands.push(savedErrand);
     }
 
     saveState();
     document.getElementById("errand-dialog").close();
     renderAll();
+    if (cloud) writeToCloud(cloud.from("errands").upsert(toErrandRow(savedErrand)));
 }
 
 function deleteErrand() {
@@ -657,6 +873,7 @@ function deleteErrand() {
     saveState();
     document.getElementById("errand-dialog").close();
     renderAll();
+    if (cloud) writeToCloud(cloud.from("errands").delete().eq("id", id));
 }
 
 function renderSettings() {
@@ -699,6 +916,7 @@ function saveStatus() {
     saveState();
     document.getElementById("status-dialog").close();
     renderAll();
+    syncProfile(state.currentUser);
 }
 
 document.querySelectorAll("[data-select-profile]").forEach((button) => {
@@ -745,6 +963,7 @@ document.querySelectorAll("[data-theme-option]").forEach((button) => {
         state.themes[state.currentUser] = button.dataset.themeOption;
         saveState();
         renderAll();
+        syncProfile(state.currentUser);
     });
 });
 
@@ -796,3 +1015,5 @@ document.querySelectorAll("dialog").forEach((dialog) => {
 });
 
 enterApp();
+refreshFromCloud();
+subscribeToCloud();

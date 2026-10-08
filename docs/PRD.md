@@ -4,7 +4,7 @@
 
 **Audience:** The two MaBestie users and contributors
 
-**Last updated:** October 7, 2026
+**Last updated:** October 8, 2026
 
 ## 1. Product summary
 
@@ -168,18 +168,25 @@ Core rules:
 
 The canonical tokens, component rules, and icon mapping live in [DESIGN_RULES.md](DESIGN_RULES.md). That document is authoritative for implementation.
 
-## 6. Data model changes
+## 6. Shared data model
 
-The following entities are expected as the product evolves:
+Supabase is the shared source of truth across both users' devices. Browser `localStorage` is an immediate device cache and fallback, not the authoritative database once cloud setup is complete.
 
-- `profiles`: the two users, their avatar or pet, and theme preference
-- `list_items`: categorized items for The List
-- `procedure_lists`: active or archived list metadata
-- `procedure_progress`: completion state for each procedure and profile/list
-- `errands`: assignments, schedules, and completion state
-- `statuses`: the latest pet/avatar status per profile
+V2 uses these tables:
 
-Exact schema and Row Level Security policies will be specified before implementation. Access remains limited to the two intended users.
+- `profiles`: the two fixed profile names, theme preference, and latest status fields
+- `list_items`: categorized items for The List, including creator and timestamps
+- `procedure_lists`: active or archived Japan list metadata and archive date
+- `procedure_progress`: completion state and completing profile for each task
+- `errands`: category, assignment, scheduling, notes, completion metadata, and timestamps
+
+The web app renders the local cache first, downloads shared state, and subscribes to Realtime database changes. If the cloud is empty, the first connected device initializes shared collections from its cache. An archive is a reversible state update; it does not delete the procedure list or progress.
+
+### Current privacy decision
+
+The Rin/Julius character picker remains a convenience, not authentication. For this private prototype, Row Level Security is enabled but permits the Supabase unauthenticated role to read and write all MaBestie rows. This means the data is shared between the intended users, but technical access is not limited to them if the project URL and publishable key are obtained.
+
+Do not store sensitive information under this policy. Secure two-person access requires a future authentication step and policies tied to approved user identities.
 
 ## 7. Non-goals for the next release
 
