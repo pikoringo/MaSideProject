@@ -46,17 +46,19 @@ Thanks for helping improve MaBestie. This guide describes the repository's curre
 
 There is no automated test suite yet. Before opening a pull request, verify the behavior affected by your change and, for broad UI changes, complete this smoke test:
 
-- The profile picker opens the home screen for both profiles.
-- Refreshing the page preserves the selected profile.
-- Each home-screen card opens the correct page, and each back button returns home.
-- Checklist details expand and collapse.
-- Tasks with prerequisites remain locked until their prerequisite is complete.
-- Arrival and daily-setup progress update when tasks change.
-- Checklist state remains correct after a refresh.
-- A date idea can be added and removed when Supabase is available.
-- Failed database requests are reported in the console without breaking navigation or locally cached checklist use.
-- External garbage-guide links open in a new tab.
-- The layout remains usable at narrow mobile and wider desktop sizes.
+- The profile picker opens the home screen for both profiles and survives a refresh.
+- Mono and Lilac preferences are saved independently for Julius and Rin.
+- Every home card and footer destination opens the correct screen.
+- The List filters correctly and supports adding, editing, and deleting items.
+- Procedure details expand, prerequisites unlock in order, and progress updates.
+- Archiving a completed procedure list removes Japan from navigation; restoring it brings Japan back.
+- Errands support adding, editing, deleting, completing, assignments, due dates, and recurrence.
+- Each profile can set its own status, and the partner's latest status appears on Home.
+- All first-milestone data remains correct after a refresh.
+- With the V2 Supabase migration applied, a change in one browser appears in another and the header reports **Shared & current**.
+- With Supabase unavailable, cached data remains usable and the header reports a local or pending state.
+- The layout remains usable at 320px and at wider desktop sizes.
+- Navigation, feature, category, and action icons follow `docs/DESIGN_RULES.md`.
 
 Also run a JavaScript syntax check when Node.js is available:
 
