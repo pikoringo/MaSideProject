@@ -227,8 +227,10 @@ let errandFilter = "all";
 let selectedStatus = "";
 let cloudRefreshTimer = null;
 let cloudChannel = null;
+let authSession = null;
 
 const appShell = document.getElementById("app-shell");
+const authGate = document.getElementById("auth-gate");
 const profileGate = document.getElementById("profile-gate");
 const app = document.getElementById("app");
 const screenTitle = document.getElementById("screen-title");
@@ -447,6 +449,15 @@ function selectProfile(profile) {
 }
 
 function enterApp() {
+    if (!authSession) {
+        authGate.hidden = false;
+        profileGate.hidden = true;
+        app.hidden = true;
+        refreshIcons();
+        return;
+    }
+
+    authGate.hidden = true;
     if (!state.currentUser) {
         profileGate.hidden = false;
         app.hidden = true;
@@ -877,6 +888,7 @@ function deleteErrand() {
 }
 
 function renderSettings() {
+    document.getElementById("account-email").textContent = authSession?.user?.email || "Signed in securely.";
     document.querySelectorAll("[data-settings-profile]").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.settingsProfile === state.currentUser));
     });
@@ -1008,12 +1020,71 @@ document.getElementById("forget-profile-button").addEventListener("click", () =>
     enterApp();
 });
 
+document.getElementById("auth-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!cloud) return;
+    const email = document.getElementById("auth-email").value.trim();
+    const button = document.getElementById("auth-submit-button");
+    const message = document.getElementById("auth-message");
+    button.disabled = true;
+    message.dataset.state = "";
+    message.textContent = "Sending your sign-in link…";
+    const { error } = await cloud.auth.signInWithOtp({
+        email,
+        options: {
+            emailRedirectTo: `${window.location.origin}${window.location.pathname}`,
+            shouldCreateUser: false
+        }
+    });
+    button.disabled = false;
+    if (error) {
+        message.dataset.state = "error";
+        message.textContent = "This email is not approved, or the link could not be sent.";
+        return;
+    }
+    message.textContent = "Check your email and open the MaBestie sign-in link.";
+});
+
+document.getElementById("sign-out-button").addEventListener("click", async () => {
+    if (!cloud) return;
+    await cloud.auth.signOut();
+});
+
 document.querySelectorAll("dialog").forEach((dialog) => {
     dialog.addEventListener("click", (event) => {
         if (event.target === dialog) dialog.close();
     });
 });
 
-enterApp();
-refreshFromCloud();
-subscribeToCloud();
+async function initializeApp() {
+    if (!cloud) {
+        document.getElementById("auth-message").dataset.state = "error";
+        document.getElementById("auth-message").textContent = "Sign-in is temporarily unavailable.";
+        enterApp();
+        return;
+    }
+
+    const { data } = await cloud.auth.getSession();
+    authSession = data.session;
+    enterApp();
+    if (authSession) {
+        await refreshFromCloud();
+        subscribeToCloud();
+    }
+
+    cloud.auth.onAuthStateChange((event, session) => {
+        authSession = session;
+        if (!session) {
+            if (cloudChannel) cloud.removeChannel(cloudChannel);
+            cloudChannel = null;
+            setSyncStatus("Signed out");
+        }
+        enterApp();
+        if (session && event === "SIGNED_IN") {
+            refreshFromCloud();
+            subscribeToCloud();
+        }
+    });
+}
+
+initializeApp();

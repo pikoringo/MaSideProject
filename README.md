@@ -9,6 +9,7 @@ MaBestie is a personal, mobile-friendly web app built for its two users and cont
 ## Features
 
 - Remembered Rin or Julius profile selection
+- Passwordless access restricted to two approved Supabase users
 - Independent Mono and Lilac profile themes
 - Categorized and filterable **The List** with item details and editing
 - Japan procedure checklist with prerequisite locking, progress, archiving, and restoring
@@ -43,7 +44,7 @@ Opening `index.html` directly may work for basic UI development, but using a loc
 
 V2 connects both users to one Supabase database. Profiles, themes, statuses, list items, errands, and procedure state are shared, while `localStorage` keeps a device cache so the interface can still open when the network is unavailable.
 
-Before the first shared run, apply the included database migration by following [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Until the migration exists in the remote project, the header displays **Setup needed** and edits remain local.
+Database setup and authentication enrollment are documented in [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
 
 When connected:
 
@@ -52,7 +53,7 @@ When connected:
 - Archiving changes the shared Japan list state; it does not delete its checklist progress.
 - A failed write remains in the local cache and is labeled **Changes pending**.
 
-The character picker is not authentication. Current Row Level Security policies deliberately allow unauthenticated access so the two-person prototype can work without accounts. This is convenient, but it is not secure access control; see the setup guide before storing sensitive information.
+Supabase Auth protects database access. The Rin/Julius character picker remains separate from authentication and can be changed from Settings.
 
 ## Project structure
 
@@ -75,7 +76,7 @@ The character picker is not authentication. Current Row Level Security policies 
 - Shared product data is stored in Supabase after the V2 migration is applied.
 - Existing profile and procedure state is migrated where possible from the V1 keys.
 - Changing profiles changes identity and preferences without hiding shared local content.
-- Profile selection is a convenience, not an identity or access-control boundary.
+- Authentication controls access; character selection controls in-app identity and can be changed independently.
 
 These details are important when changing the schema or tightening database access.
 
@@ -87,7 +88,6 @@ The evolving product requirements are documented in [docs/PRD.md](docs/PRD.md). 
 
 ## Known limitations
 
-- There is no authentication; the profile picker is a convenience, not an identity check, and the current database policy is not securely private.
 - The service worker is empty, so cached data does not make every app asset available offline.
 - Failed cloud writes stay in the local cache but are not automatically replayed after reconnecting yet.
 - Automated tests and linting are not configured.
