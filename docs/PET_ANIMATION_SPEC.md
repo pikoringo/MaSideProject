@@ -7,7 +7,7 @@ MaBestie uses two original pixel pets with a shared animation vocabulary:
 - **Royal lemur:** theatrical, energetic, crown and tail-led motion
 - **Tiny lemur:** affectionate, compact, eye and hop-led motion
 
-The pet is selected per profile. Pet selection and pet state are synchronized so the partner sees the same character and state in the app and, later, in the iPhone widget.
+The pet is selected per profile. Pet selection and pet state are synchronized so the partner sees the same character and state in the web app.
 
 ## Core states
 
@@ -31,7 +31,7 @@ The pet is selected per profile. Pet selection and pet state are synchronized so
 - [`royal-lemur-sprites-v1.png`](../images/pets/royal-lemur-sprites-v1.png) — retained as the softer initial exploration
 - [`tiny-lemur-sprites-v1.png`](../images/pets/tiny-lemur-sprites-v1.png)
 
-Each current sheet contains seven rows in the state order above and six frames per row. The web prototype treats every sheet as a deterministic 6-by-7 atlas and clips it through a fixed-aspect viewport. A later art-polish pass may still tighten individual ground anchors before the native widget export.
+Each current sheet contains seven rows in the state order above and six frames per row. The web app treats every sheet as a deterministic 6-by-7 atlas and clips it through a fixed-aspect viewport. A later art-polish pass may still tighten individual ground anchors.
 
 Production web atlases are generated from those concept sheets with [`scripts/normalize_sprite_atlas.py`](../scripts/normalize_sprite_atlas.py). The normalizer isolates each pose, applies a stable scale within each animation row, centers it horizontally, and aligns it to a shared ground line. The app currently loads:
 
@@ -51,17 +51,11 @@ Existing status labels map to pet states as follows:
 
 ## Playback rules
 
-### Web app
-
 - Use 6–10 frames per second depending on the motion.
 - Loop `idle`, `hungry`, `busy`, `on_my_way`, and `happy` while the pet is visible.
 - Play the transition into `sleepy` or `need_a_hug`, then hold or use a slower loop.
 - Pause animation when the page is hidden.
 - Under `prefers-reduced-motion`, show the most expressive static frame.
-
-### iPhone widget
-
-WidgetKit does not run a continuous game loop. Show a short animation of no more than two seconds when widget data changes, then hold a representative static frame. Use timeline or push-driven refreshes when the partner changes the pet state; do not schedule frame-by-frame timeline entries.
 
 ## Data shape
 
@@ -69,7 +63,7 @@ Each profile needs:
 
 - `pet_id`: `royal_lemur` or `tiny_lemur`
 - `pet_state`: one of the seven state keys
-- `pet_message`: optional short text
-- `pet_updated_at`: timestamp used for freshness and widget updates
+- `status_message`: optional short text
+- `status_updated_at`: timestamp used for freshness in the web app
 
 Pet selection belongs in Settings. Pet state belongs in the Home status editor so changing a state remains a quick action.

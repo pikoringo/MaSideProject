@@ -14,7 +14,7 @@ MaBestie is a personal, mobile-friendly web app built for its two users and cont
 - Japan procedure checklist with prerequisite locking, progress, archiving, and restoring
 - Survival Guide with Japan emergency numbers and Maebashi garbage sorting links
 - Shared errand planning with assignments, due dates, and recurrence
-- Lightweight pet/avatar status updates
+- Animated pixel-pet status updates in the web app
 - Quiet Accent interface with one consistent Lucide icon system
 
 ## Tech stack

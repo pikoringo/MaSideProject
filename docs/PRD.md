@@ -113,9 +113,9 @@ The default view shows open errands first, with compact summaries for open, due-
 
 The Home screen links to a reference screen with Japan's emergency numbers (police 110, fire/ambulance 119, coast guard 118) and the Maebashi garbage sorting guide and its iPhone app. Numbers are labeled and dialable. External resources point to the original official city page and app listing. This guide remains available even when the Japan procedure list is archived.
 
-### 4.5 Pet status and iOS widget
+### 4.5 Pet status in the web app
 
-Each user has a distinct pet or avatar. A user sets only their own status; their partner sees that status in the app and, later, in an iOS home-screen widget.
+Each user has a distinct pet or avatar. A user sets only their own status; their partner sees that status in the web app.
 
 Initial status choices:
 
@@ -132,14 +132,13 @@ Requirements:
 - Show the user's pet, status label, optional short message, and last-updated time.
 - Display the partner's latest status on Home.
 - Clearly identify stale status with its timestamp.
-- Keep the widget read-only in the first release; status editing happens in the app.
 - Store only the latest active status per user initially.
 - Allow pet selection from Settings without changing the signed-in account or active character.
 - Allow the user to choose a pet mood independently; choosing a status suggests the closest mood, which can be overridden before saving.
 - Synchronize the selected pet, pet state, optional message, and last-updated time.
 - Respect reduced-motion preferences with a representative static frame.
 
-The web app can loop sprite animation while visible. A real iOS home-screen widget requires a later native iOS/WidgetKit component and a deliberate refresh strategy. Widget animations are short update transitions rather than continuous loops. The canonical animation and data specification lives in [PET_ANIMATION_SPEC.md](PET_ANIMATION_SPEC.md).
+The web app loops sprite animation while visible. There is no native iOS app or home-screen widget in the current product plan; the project remains free to use as a web app. The canonical web animation specification lives in [PET_ANIMATION_SPEC.md](PET_ANIMATION_SPEC.md).
 
 ### 4.6 Settings and per-user themes
 
@@ -209,7 +208,7 @@ Do not store sensitive information under this policy. Secure two-person access r
 - Comments, reactions, or activity feeds
 - Advanced trip planning, booking, or payments
 - Real-time location sharing
-- A native iOS widget in the same release as the web UI changes
+- A native iOS app or home-screen widget while the project remains free-only
 
 ## 8. Acceptance criteria for the prototype direction
 
