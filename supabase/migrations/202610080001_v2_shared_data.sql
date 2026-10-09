@@ -10,6 +10,8 @@ create extension if not exists pgcrypto;
 create table if not exists public.profiles (
     name text primary key check (name in ('Rin', 'Julius')),
     theme text not null check (theme in ('mono', 'lilac')),
+    pet_id text not null default 'tiny_lemur' check (pet_id in ('royal_lemur', 'tiny_lemur')),
+    pet_state text not null default 'idle' check (pet_state in ('idle', 'hungry', 'busy', 'on_my_way', 'sleepy', 'need_a_hug', 'happy')),
     status text not null default '' check (status in ('', 'At work', 'Studying', 'On my way', 'Resting', 'Need a hug')),
     status_message text not null default '' check (char_length(status_message) <= 80),
     status_updated_at timestamptz,
@@ -60,8 +62,8 @@ create table if not exists public.errands (
     check ((completed and completed_at is not null) or (not completed and completed_at is null))
 );
 
-insert into public.profiles (name, theme)
-values ('Rin', 'lilac'), ('Julius', 'mono')
+insert into public.profiles (name, theme, pet_id)
+values ('Rin', 'lilac', 'tiny_lemur'), ('Julius', 'mono', 'royal_lemur')
 on conflict (name) do nothing;
 
 insert into public.procedure_lists (id)

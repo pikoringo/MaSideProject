@@ -832,6 +832,52 @@ p {
     gap: 8px;
 }
 
+.pet-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.pet-option {
+    min-width: 0;
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+}
+
+.pet-option[aria-pressed="true"] {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.pet-option > span:last-child {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.pet-option strong {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.pet-option small {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.pet-tile-option {
+    width: 96px;
+    max-width: 100%;
+    background: var(--surface-subtle);
+}
+
 .theme-option {
     min-height: 64px;
     display: grid;

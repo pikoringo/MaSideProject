@@ -151,6 +151,20 @@
                     </section>
 
                     <section class="settings-section card">
+                        <div class="settings-heading"><span class="feature-icon"><i data-lucide="paw-print" aria-hidden="true"></i></span><div><h2>Pet</h2><p>Choose the character that represents this profile.</p></div></div>
+                        <div class="pet-options" role="group" aria-label="Profile pet">
+                            <button class="pet-option" type="button" data-pet-option="royal_lemur" aria-pressed="false">
+                                <span class="pet-tile pet-tile-option" id="settings-royal-pet" data-pet-sprite aria-hidden="true"><img alt=""></span>
+                                <span><strong>Royal lemur</strong><small>Theatrical and confident</small></span>
+                            </button>
+                            <button class="pet-option" type="button" data-pet-option="tiny_lemur" aria-pressed="false">
+                                <span class="pet-tile pet-tile-option" id="settings-tiny-pet" data-pet-sprite aria-hidden="true"><img alt=""></span>
+                                <span><strong>Tiny lemur</strong><small>Bright-eyed and playful</small></span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="settings-section card">
                         <div class="settings-heading"><span class="feature-icon"><i data-lucide="archive" aria-hidden="true"></i></span><div><h2>Archived lists</h2><p>Restore a completed chapter anytime.</p></div></div>
                         <p class="muted-copy" id="archive-empty-message">No archived lists.</p>
                         <div class="archive-item" id="archived-procedures-item" hidden>
@@ -213,12 +227,23 @@
             <div class="status-pet-preview" aria-hidden="true">
                 <span class="pet-tile pet-tile-preview" id="status-pet-preview" data-pet-sprite><img alt=""></span>
             </div>
+            <span class="field-label">Status</span>
             <div class="status-options" id="status-options" role="group" aria-label="Status">
                 <button type="button" data-status="At work">At work</button>
                 <button type="button" data-status="Studying">Studying</button>
                 <button type="button" data-status="On my way">On my way</button>
                 <button type="button" data-status="Resting">Resting</button>
                 <button type="button" data-status="Need a hug">Need a hug</button>
+            </div>
+            <span class="field-label">Pet mood</span>
+            <div class="status-options" id="pet-state-options" role="group" aria-label="Pet mood">
+                <button type="button" data-pet-state="idle">Idle</button>
+                <button type="button" data-pet-state="hungry">Hungry</button>
+                <button type="button" data-pet-state="busy">Busy</button>
+                <button type="button" data-pet-state="on_my_way">On my way</button>
+                <button type="button" data-pet-state="sleepy">Sleepy</button>
+                <button type="button" data-pet-state="need_a_hug">Need a hug</button>
+                <button type="button" data-pet-state="happy">Happy</button>
             </div>
             <label class="field-label" for="status-message">Short message</label>
             <input id="status-message" type="text" maxlength="80" placeholder="Optional">

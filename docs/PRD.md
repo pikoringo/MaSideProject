@@ -129,6 +129,7 @@ Requirements:
 - Keep the widget read-only in the first release; status editing happens in the app.
 - Store only the latest active status per user initially.
 - Allow pet selection from Settings without changing the signed-in account or active character.
+- Allow the user to choose a pet mood independently; choosing a status suggests the closest mood, which can be overridden before saving.
 - Synchronize the selected pet, pet state, optional message, and last-updated time.
 - Respect reduced-motion preferences with a representative static frame.
 

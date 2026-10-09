@@ -165,9 +165,10 @@ function createInitialState() {
     return {
         currentUser: PROFILE_META[migratedUser] ? migratedUser : null,
         themes: { Rin: "lilac", Julius: "mono" },
+        pets: { Rin: "tiny_lemur", Julius: "royal_lemur" },
         statuses: {
-            Rin: { value: "", message: "", updatedAt: null },
-            Julius: { value: "", message: "", updatedAt: null }
+            Rin: { value: "", petState: "idle", message: "", updatedAt: null },
+            Julius: { value: "", petState: "idle", message: "", updatedAt: null }
         },
         listItems: [
             createSeedItem("Perfect Days", "movies", "Watch it on a quiet Friday night with convenience-store snacks.", "Rin"),
@@ -240,6 +241,7 @@ function loadState() {
             ...saved,
             currentUser: PROFILE_META[saved.currentUser] ? saved.currentUser : initial.currentUser,
             themes: { ...initial.themes, ...saved.themes },
+            pets: { ...initial.pets, ...saved.pets },
             statuses: { ...initial.statuses, ...saved.statuses },
             listItems: Array.isArray(saved.listItems) ? saved.listItems : initial.listItems,
             errands: Array.isArray(saved.errands) ? saved.errands : initial.errands,
@@ -256,6 +258,7 @@ let currentScreen = "home";
 let listFilter = "all";
 let errandFilter = "all";
 let selectedStatus = "";
+let selectedPetState = "idle";
 let cloudRefreshTimer = null;
 let cloudChannel = null;
 let petAnimationFrame = null;
@@ -378,8 +381,10 @@ async function initializeEmptyCollections(remote) {
 function applySharedState(remote) {
     remote.profiles.forEach((profile) => {
         state.themes[profile.name] = profile.theme;
+        state.pets[profile.name] = PET_META[profile.pet_id] ? profile.pet_id : PROFILE_META[profile.name].pet;
         state.statuses[profile.name] = {
             value: profile.status || "",
+            petState: PET_STATE_META[profile.pet_state] ? profile.pet_state : petStateForStatus(profile.status),
             message: profile.status_message || "",
             updatedAt: profile.status_updated_at
         };
@@ -449,6 +454,8 @@ function syncProfile(profile) {
     return writeToCloud(cloud.from("profiles").upsert({
         name: profile,
         theme: state.themes[profile] || PROFILE_META[profile].defaultTheme,
+        pet_id: state.pets[profile] || PROFILE_META[profile].pet,
+        pet_state: PET_STATE_META[status.petState] ? status.petState : petStateForStatus(status.value),
         status: status.value || "",
         status_message: status.message || "",
         status_updated_at: status.updatedAt || null
@@ -549,20 +556,19 @@ function setPetFrame(element, frame) {
     image.style.setProperty("--pet-y", `${row * (-100 / 7)}%`);
 }
 
-function configurePetSprite(element, profile, status) {
-    const petId = PROFILE_META[profile]?.pet || "tiny_lemur";
+function configurePetSprite(element, profile, stateKey = "idle", petId = state.pets[profile] || PROFILE_META[profile]?.pet || "tiny_lemur") {
     const pet = PET_META[petId];
-    const stateKey = petStateForStatus(status);
-    const animation = PET_STATE_META[stateKey];
+    const safeStateKey = PET_STATE_META[stateKey] ? stateKey : "idle";
+    const animation = PET_STATE_META[safeStateKey];
     const image = element.querySelector("img");
 
     image.src = pet.sprite;
     element.dataset.pet = petId;
-    element.dataset.petState = stateKey;
+    element.dataset.petState = safeStateKey;
     element.dataset.petRow = animation.row;
     element.dataset.frameDuration = animation.frameDuration;
     element.dataset.stillFrame = animation.stillFrame;
-    element.setAttribute("title", `${profile}'s ${pet.label}: ${stateKey.replaceAll("_", " ")}`);
+    element.setAttribute("title", `${profile}'s ${pet.label}: ${safeStateKey.replaceAll("_", " ")}`);
     setPetFrame(element, motionPreference.matches ? animation.stillFrame : 0);
 }
 
@@ -587,7 +593,7 @@ function refreshPetMotionPreference() {
 function renderHome() {
     const partner = partnerFor(state.currentUser);
     const status = state.statuses[partner] || { value: "", message: "", updatedAt: null };
-    configurePetSprite(document.getElementById("partner-pet"), partner, status.value);
+    configurePetSprite(document.getElementById("partner-pet"), partner, status.petState || petStateForStatus(status.value));
     document.getElementById("partner-status-name").textContent = `${partner} · status`;
     document.getElementById("partner-status-text").textContent = status.value || "No status yet";
     document.getElementById("partner-status-time").textContent = status.updatedAt
@@ -961,6 +967,12 @@ function renderSettings() {
     document.querySelectorAll("[data-theme-option]").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.themeOption === activeTheme));
     });
+    const activePet = state.pets[state.currentUser] || PROFILE_META[state.currentUser].pet;
+    document.querySelectorAll("[data-pet-option]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.petOption === activePet));
+    });
+    configurePetSprite(document.getElementById("settings-royal-pet"), state.currentUser, "idle", "royal_lemur");
+    configurePetSprite(document.getElementById("settings-tiny-pet"), state.currentUser, "idle", "tiny_lemur");
 
     document.getElementById("archive-empty-message").hidden = state.proceduresArchived;
     document.getElementById("archived-procedures-item").hidden = !state.proceduresArchived;
@@ -976,10 +988,14 @@ function renderNavigation() {
 function openStatusDialog() {
     const status = state.statuses[state.currentUser] || { value: "", message: "" };
     selectedStatus = status.value;
-    configurePetSprite(document.getElementById("status-pet-preview"), state.currentUser, selectedStatus);
+    selectedPetState = PET_STATE_META[status.petState] ? status.petState : petStateForStatus(selectedStatus);
+    configurePetSprite(document.getElementById("status-pet-preview"), state.currentUser, selectedPetState);
     document.getElementById("status-message").value = status.message || "";
     document.querySelectorAll("[data-status]").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.status === selectedStatus));
+    });
+    document.querySelectorAll("[data-pet-state]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.petState === selectedPetState));
     });
     document.getElementById("status-dialog").showModal();
 }
@@ -988,6 +1004,7 @@ function saveStatus() {
     if (!selectedStatus) return;
     state.statuses[state.currentUser] = {
         value: selectedStatus,
+        petState: selectedPetState,
         message: document.getElementById("status-message").value.trim(),
         updatedAt: new Date().toISOString()
     };
@@ -1045,11 +1062,34 @@ document.querySelectorAll("[data-theme-option]").forEach((button) => {
     });
 });
 
+document.querySelectorAll("[data-pet-option]").forEach((button) => {
+    button.addEventListener("click", () => {
+        state.pets[state.currentUser] = button.dataset.petOption;
+        saveState();
+        renderAll();
+        syncProfile(state.currentUser);
+    });
+});
+
 document.querySelectorAll("[data-status]").forEach((button) => {
     button.addEventListener("click", () => {
         selectedStatus = button.dataset.status;
-        configurePetSprite(document.getElementById("status-pet-preview"), state.currentUser, selectedStatus);
+        selectedPetState = petStateForStatus(selectedStatus);
+        configurePetSprite(document.getElementById("status-pet-preview"), state.currentUser, selectedPetState);
         document.querySelectorAll("[data-status]").forEach((option) => {
+            option.setAttribute("aria-pressed", String(option === button));
+        });
+        document.querySelectorAll("[data-pet-state]").forEach((option) => {
+            option.setAttribute("aria-pressed", String(option.dataset.petState === selectedPetState));
+        });
+    });
+});
+
+document.querySelectorAll("[data-pet-state]").forEach((button) => {
+    button.addEventListener("click", () => {
+        selectedPetState = button.dataset.petState;
+        configurePetSprite(document.getElementById("status-pet-preview"), state.currentUser, selectedPetState);
+        document.querySelectorAll("[data-pet-state]").forEach((option) => {
             option.setAttribute("aria-pressed", String(option === button));
         });
     });
