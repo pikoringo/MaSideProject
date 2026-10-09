@@ -48,7 +48,7 @@
             <div class="app-content" id="app-content">
                 <section class="screen" id="home-screen" data-screen="home" aria-labelledby="screen-title">
                     <button class="partner-status card" id="partner-status-card" type="button" data-open-dialog="status-dialog">
-                        <span class="avatar-tile"><img id="partner-avatar" src="images/KingJulian.png" alt=""></span>
+                        <span class="pet-tile pet-tile-compact" id="partner-pet" data-pet-sprite aria-hidden="true"><img alt=""></span>
                         <span class="partner-status-copy">
                             <small id="partner-status-name">Julius · status</small>
                             <strong id="partner-status-text">No status yet</strong>
@@ -72,6 +72,10 @@
                         <button class="feature-card card" id="home-procedures-card" type="button" data-open-screen="procedures">
                             <span class="feature-icon"><i data-lucide="landmark" aria-hidden="true"></i></span>
                             <span><strong>Japan</strong><small id="home-procedure-count">0 of 10 complete</small></span>
+                        </button>
+                        <button class="feature-card card" type="button" data-open-screen="survival">
+                            <span class="feature-icon"><i data-lucide="shield-alert" aria-hidden="true"></i></span>
+                            <span><strong>Survival guide</strong><small>Emergency numbers & garbage sorting</small></span>
                         </button>
                         <button class="feature-card card" type="button" data-open-screen="settings">
                             <span class="feature-icon"><i data-lucide="settings" aria-hidden="true"></i></span>
@@ -111,6 +115,40 @@
                     <button class="secondary-button block-button" id="archive-procedures-button" type="button" disabled><i data-lucide="archive" aria-hidden="true"></i>Archive completed list</button>
                 </section>
 
+                <section class="screen" id="survival-screen" data-screen="survival" hidden>
+                    <div class="section-heading"><h2>Emergency numbers</h2></div>
+                    <div class="survival-list">
+                        <a class="survival-row" href="tel:110" aria-label="Call police emergency number 110">
+                            <span class="item-leading"><i data-lucide="phone" aria-hidden="true"></i></span>
+                            <span class="item-copy"><strong>Police</strong><small>Emergency · Japan-wide</small></span>
+                            <span class="survival-number">110</span>
+                        </a>
+                        <a class="survival-row" href="tel:119" aria-label="Call fire or ambulance emergency number 119">
+                            <span class="item-leading"><i data-lucide="phone" aria-hidden="true"></i></span>
+                            <span class="item-copy"><strong>Fire / ambulance</strong><small>Emergency · Japan-wide</small></span>
+                            <span class="survival-number">119</span>
+                        </a>
+                        <a class="survival-row" href="tel:118" aria-label="Call coast guard emergency number 118">
+                            <span class="item-leading"><i data-lucide="phone" aria-hidden="true"></i></span>
+                            <span class="item-copy"><strong>Coast Guard</strong><small>Emergency at sea</small></span>
+                            <span class="survival-number">118</span>
+                        </a>
+                    </div>
+                    <div class="section-heading"><h2>Garbage sorting in Maebashi</h2></div>
+                    <div class="survival-list">
+                        <a class="survival-row" href="https://www.city.maebashi.gunma.jp/soshiki/kankyo/gomiseisaku/oshirase/2604.html" target="_blank" rel="noopener noreferrer">
+                            <span class="item-leading"><i data-lucide="recycle" aria-hidden="true"></i></span>
+                            <span class="item-copy"><strong>Maebashi garbage guide</strong><small>Sorting and collection information · City of Maebashi</small></span>
+                            <i data-lucide="external-link" aria-hidden="true"></i>
+                        </a>
+                        <a class="survival-row" href="https://apps.apple.com/jp/app/%E3%81%94%E3%81%BF%E5%88%86%E5%88%A5%E3%82%A2%E3%83%97%E3%83%AA-%E3%81%95%E3%82%93%E3%81%82-%E3%82%8B/id977071564" target="_blank" rel="noopener noreferrer">
+                            <span class="item-leading"><i data-lucide="recycle" aria-hidden="true"></i></span>
+                            <span class="item-copy"><strong>さんあ〜る for iPhone</strong><small>Garbage sorting app · App Store</small></span>
+                            <i data-lucide="external-link" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </section>
+
                 <section class="screen" id="errands-screen" data-screen="errands" hidden>
                     <div class="summary-row" aria-label="Errand summary">
                         <div class="summary-card card"><strong id="errands-open-count">0</strong><span>Open</span></div>
@@ -147,6 +185,20 @@
                         <div class="theme-options" role="group" aria-label="Profile theme">
                             <button class="theme-option" type="button" data-theme-option="mono" aria-pressed="false"><span class="theme-swatch mono-swatch"></span><span><strong>Mono</strong><small>Black, white & graphite</small></span></button>
                             <button class="theme-option" type="button" data-theme-option="lilac" aria-pressed="false"><span class="theme-swatch lilac-swatch"></span><span><strong>Lilac</strong><small>Neutral with quiet color</small></span></button>
+                        </div>
+                    </section>
+
+                    <section class="settings-section card">
+                        <div class="settings-heading"><span class="feature-icon"><i data-lucide="paw-print" aria-hidden="true"></i></span><div><h2>Pet</h2><p>Choose the character that represents this profile.</p></div></div>
+                        <div class="pet-options" role="group" aria-label="Profile pet">
+                            <button class="pet-option" type="button" data-pet-option="royal_lemur" aria-pressed="false">
+                                <span class="pet-tile pet-tile-option" id="settings-royal-pet" data-pet-sprite aria-hidden="true"><img alt=""></span>
+                                <span><strong>Royal lemur</strong><small>Theatrical and confident</small></span>
+                            </button>
+                            <button class="pet-option" type="button" data-pet-option="tiny_lemur" aria-pressed="false">
+                                <span class="pet-tile pet-tile-option" id="settings-tiny-pet" data-pet-sprite aria-hidden="true"><img alt=""></span>
+                                <span><strong>Tiny lemur</strong><small>Bright-eyed and playful</small></span>
+                            </button>
                         </div>
                     </section>
 
@@ -210,12 +262,26 @@
     <dialog id="status-dialog" class="app-dialog">
         <form method="dialog" id="status-form">
             <div class="dialog-header"><div><p class="eyebrow">Pet status</p><h2>Set your status</h2></div><button class="icon-button" type="button" data-close-dialog="status-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
+            <div class="status-pet-preview" aria-hidden="true">
+                <span class="pet-tile pet-tile-preview" id="status-pet-preview" data-pet-sprite><img alt=""></span>
+            </div>
+            <span class="field-label">Status</span>
             <div class="status-options" id="status-options" role="group" aria-label="Status">
                 <button type="button" data-status="At work">At work</button>
                 <button type="button" data-status="Studying">Studying</button>
                 <button type="button" data-status="On my way">On my way</button>
                 <button type="button" data-status="Resting">Resting</button>
                 <button type="button" data-status="Need a hug">Need a hug</button>
+            </div>
+            <span class="field-label">Pet mood</span>
+            <div class="status-options" id="pet-state-options" role="group" aria-label="Pet mood">
+                <button type="button" data-pet-state="idle">Idle</button>
+                <button type="button" data-pet-state="hungry">Hungry</button>
+                <button type="button" data-pet-state="busy">Busy</button>
+                <button type="button" data-pet-state="on_my_way">On my way</button>
+                <button type="button" data-pet-state="sleepy">Sleepy</button>
+                <button type="button" data-pet-state="need_a_hug">Need a hug</button>
+                <button type="button" data-pet-state="happy">Happy</button>
             </div>
             <label class="field-label" for="status-message">Short message</label>
             <input id="status-message" type="text" maxlength="80" placeholder="Optional">

@@ -4,11 +4,13 @@
 
 **Audience:** The two MaBestie users and contributors
 
-**Last updated:** October 8, 2026
+**Last updated:** October 9, 2026
 
 ## 1. Product summary
 
 MaBestie is a private, two-person companion app. It helps its users coordinate life in Japan, collect things they want to experience together, share errands, and communicate lightweight personal status through their avatars or pets.
+
+The original Survival Guide remains available from Home, with Japan emergency numbers and Maebashi garbage sorting resources.
 
 The product is intentionally designed for two known users. Public accounts, discovery, social feeds, and general-purpose use are outside the current scope.
 
@@ -107,7 +109,11 @@ Each errand should support:
 
 The default view shows open errands first, with compact summaries for open, due-today, and recurring items. Completed errands can be hidden from the default view without being deleted.
 
-### 4.4 Pet status and iOS widget
+### 4.4 Survival Guide
+
+The Home screen links to a reference screen with Japan's emergency numbers (police 110, fire/ambulance 119, coast guard 118) and the Maebashi garbage sorting guide and its iPhone app. Numbers are labeled and dialable. External resources point to the original official city page and app listing. This guide remains available even when the Japan procedure list is archived.
+
+### 4.5 Pet status and iOS widget
 
 Each user has a distinct pet or avatar. A user sets only their own status; their partner sees that status in the app and, later, in an iOS home-screen widget.
 
@@ -119,6 +125,8 @@ Initial status choices:
 - Resting
 - Need a hug
 
+Each profile also selects one of two original pixel pets: a theatrical royal lemur or a tiny wide-eyed lemur. The initial pet states are Idle, Hungry, Busy, On my way, Sleepy, Need a hug, and Happy. Each state has a distinct animation for both pets while keeping the same underlying state key.
+
 Requirements:
 
 - Show the user's pet, status label, optional short message, and last-updated time.
@@ -126,10 +134,14 @@ Requirements:
 - Clearly identify stale status with its timestamp.
 - Keep the widget read-only in the first release; status editing happens in the app.
 - Store only the latest active status per user initially.
+- Allow pet selection from Settings without changing the signed-in account or active character.
+- Allow the user to choose a pet mood independently; choosing a status suggests the closest mood, which can be overridden before saving.
+- Synchronize the selected pet, pet state, optional message, and last-updated time.
+- Respect reduced-motion preferences with a representative static frame.
 
-The current web app can implement the in-app status experience. A real iOS home-screen widget requires a later native iOS/WidgetKit component and a deliberate refresh strategy.
+The web app can loop sprite animation while visible. A real iOS home-screen widget requires a later native iOS/WidgetKit component and a deliberate refresh strategy. Widget animations are short update transitions rather than continuous loops. The canonical animation and data specification lives in [PET_ANIMATION_SPEC.md](PET_ANIMATION_SPEC.md).
 
-### 4.5 Settings and per-user themes
+### 4.6 Settings and per-user themes
 
 Settings is a persistent footer destination.
 
@@ -181,6 +193,8 @@ V2 uses these tables:
 - `errands`: category, assignment, scheduling, notes, completion metadata, and timestamps
 
 The web app renders the local cache first, downloads shared state, and subscribes to Realtime database changes. If the cloud is empty, the first connected device initializes shared collections from its cache. An archive is a reversible state update; it does not delete the procedure list or progress.
+
+V1 date ideas used the `date_ideas` table. The six surviving entries were copied into `list_items` on October 9, 2026, preserving their creator and original creation date. The source table remains as a backup; the migration is idempotent and does not replace edited V2 items. Existing V2 Japan procedure progress takes precedence over older `task_progress` rows.
 
 ### Current privacy decision
 
