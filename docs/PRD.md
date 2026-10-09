@@ -119,6 +119,8 @@ Initial status choices:
 - Resting
 - Need a hug
 
+Each profile also selects one of two original pixel pets: a theatrical royal lemur or a tiny wide-eyed lemur. The initial pet states are Idle, Hungry, Busy, On my way, Sleepy, Need a hug, and Happy. Each state has a distinct animation for both pets while keeping the same underlying state key.
+
 Requirements:
 
 - Show the user's pet, status label, optional short message, and last-updated time.
@@ -126,8 +128,11 @@ Requirements:
 - Clearly identify stale status with its timestamp.
 - Keep the widget read-only in the first release; status editing happens in the app.
 - Store only the latest active status per user initially.
+- Allow pet selection from Settings without changing the signed-in account or active character.
+- Synchronize the selected pet, pet state, optional message, and last-updated time.
+- Respect reduced-motion preferences with a representative static frame.
 
-The current web app can implement the in-app status experience. A real iOS home-screen widget requires a later native iOS/WidgetKit component and a deliberate refresh strategy.
+The web app can loop sprite animation while visible. A real iOS home-screen widget requires a later native iOS/WidgetKit component and a deliberate refresh strategy. Widget animations are short update transitions rather than continuous loops. The canonical animation and data specification lives in [PET_ANIMATION_SPEC.md](PET_ANIMATION_SPEC.md).
 
 ### 4.5 Settings and per-user themes
 
