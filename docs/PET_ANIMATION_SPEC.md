@@ -25,7 +25,8 @@ The pet is selected per profile. Pet selection and pet state are synchronized so
 
 ## Sprite sources
 
-- [`royal-lemur-sprites-v1.png`](../images/pets/royal-lemur-sprites-v1.png)
+- [`royal-lemur-sprites-v2.png`](../images/pets/royal-lemur-sprites-v2.png) — current direction: lanky, angular, confident, and comedically theatrical
+- [`royal-lemur-sprites-v1.png`](../images/pets/royal-lemur-sprites-v1.png) — retained as the softer initial exploration
 - [`tiny-lemur-sprites-v1.png`](../images/pets/tiny-lemur-sprites-v1.png)
 
 Each concept sheet contains seven rows in the state order above and six frames per row. Before production use, normalize the generated cells into a deterministic sprite atlas with equal frame dimensions and a shared ground anchor.
