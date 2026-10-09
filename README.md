@@ -12,6 +12,7 @@ MaBestie is a personal, mobile-friendly web app built for its two users and cont
 - Independent Mono and Lilac profile themes
 - Categorized and filterable **The List** with item details and editing
 - Japan procedure checklist with prerequisite locking, progress, archiving, and restoring
+- Survival Guide with Japan emergency numbers and Maebashi garbage sorting links
 - Shared errand planning with assignments, due dates, and recurrence
 - Lightweight pet/avatar status updates
 - Quiet Accent interface with one consistent Lucide icon system
@@ -44,6 +45,8 @@ Opening `index.html` directly may work for basic UI development, but using a loc
 V2 connects both users to one Supabase database. Profiles, themes, statuses, list items, errands, and procedure state are shared, while `localStorage` keeps a device cache so the interface can still open when the network is unavailable.
 
 Before the first shared run, apply the included database migration by following [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Until the migration exists in the remote project, the header displays **Setup needed** and edits remain local.
+
+The original Date Ideas entries used a separate `date_ideas` table. See the [legacy recovery migration](supabase/migrations/202610090002_restore_legacy_date_ideas.sql) when upgrading an existing database. The original table is retained as a backup.
 
 When connected:
 

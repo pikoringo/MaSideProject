@@ -143,6 +143,7 @@ Rin's dark appearance uses:
 - Use cards only for grouped or highlighted content, not every element.
 - Card backgrounds use `--surface`; cards do not receive category colors.
 - Each row has one leading icon, one text block, and at most one trailing status or action.
+- Reference screens may group important numbers in a neutral card and use linked rows for official resources. Keep the number, label, and destination visible in text.
 
 ### Filters
 
@@ -202,6 +203,10 @@ Use **Lucide** as the only interface icon family. Lucide's outline style matches
 | Errands | `shopping-basket` |
 | Settings | `settings` |
 | Pet status | `paw-print` |
+| Survival guide | `shield-alert` |
+| Emergency phone | `phone` |
+| Garbage sorting | `recycle` |
+| External resource | `external-link` |
 | Movies | `clapperboard` |
 | Places to go | `map-pin` |
 | Food to eat | `utensils` |

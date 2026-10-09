@@ -478,6 +478,47 @@ p {
     gap: 8px;
 }
 
+.survival-list {
+    display: grid;
+    gap: 8px;
+}
+
+.survival-row {
+    min-height: 68px;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 11px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+}
+
+.survival-row:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+    outline-offset: 2px;
+}
+
+.survival-row .item-copy small {
+    white-space: normal;
+}
+
+.survival-row > svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    stroke-width: 1.75;
+}
+
+.survival-number {
+    font-size: 18px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
 .list-item,
 .errand-item {
     width: 100%;

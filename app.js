@@ -67,6 +67,7 @@ const SCREEN_META = {
     home: { title: "Home", eyebrow: "Your shared space" },
     list: { title: "The List", eyebrow: "Saved together" },
     procedures: { title: "Japan procedures", eyebrow: "Arrival checklist" },
+    survival: { title: "Survival guide", eyebrow: "Useful in Japan" },
     errands: { title: "Errands", eyebrow: "Shared responsibilities" },
     settings: { title: "Settings", eyebrow: "Your preferences" }
 };
