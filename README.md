@@ -26,6 +26,8 @@ The app intentionally has no build step. It uses:
 - [Supabase](https://supabase.com/) for shared Postgres data and Realtime updates
 - Browser `localStorage` as the immediate offline cache
 
+An experimental [iPhone widget source prototype](ios/README.md) lives separately under `ios/`. It is not part of the published web app or installable on phones yet.
+
 ## Run locally
 
 Clone the repository and serve its root directory with any static file server. For example, with Python 3:

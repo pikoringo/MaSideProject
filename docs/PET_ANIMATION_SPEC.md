@@ -1,6 +1,6 @@
 # Pet animation specification
 
-**Status:** Web animation prototype implemented
+**Status:** Web animation live; native widget source prototype in progress
 
 MaBestie uses two original pixel pets with a shared animation vocabulary:
 
@@ -62,6 +62,8 @@ Existing status labels map to pet states as follows:
 ### iPhone widget
 
 WidgetKit does not run a continuous game loop. Show a short animation of no more than two seconds when widget data changes, then hold a representative static frame. Use timeline or push-driven refreshes when the partner changes the pet state; do not schedule frame-by-frame timeline entries.
+
+The current [native prototype](../ios/README.md) uses one still frame per state and offers separate Rin-status and Julius-status widgets. It fetches the latest partner profile from Supabase on WidgetKit's timeline; this is not realtime. A distributable widget and change-transition animation remain future work.
 
 ## Data shape
 
