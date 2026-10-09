@@ -12,7 +12,7 @@ Each reads the latest partner profile from the same Supabase project as the web 
 ## Build status
 
 - `MaBestieWidgetExtension` compiles for generic iOS with Xcode 27.
-- The containing `MaBestieWidgetHost` build currently fails at Xcode's `ValidateEmbeddedBinary` step with `Couldn't load Info dictionary` for the embedded `.appex`, even though the extension's processed `Info.plist` parses and the extension target builds independently. This must be resolved before device testing or installation.
+- The containing `MaBestieWidgetHost` build currently fails at Xcode 27's `ValidateEmbeddedBinary` step with `Couldn't load Info dictionary` for the embedded `.appex`, even though the extension's processed `Info.plist` parses and the extension target builds independently. The same failure occurs with an XcodeGen-generated project. This must be resolved before device testing or installation.
 - No iOS Simulator runtime or connected iPhone is available in the current development environment, so the small/medium layouts have not had visual device QA yet.
 
 The extension-only verification command is:
@@ -22,6 +22,8 @@ xcodebuild -project ios/MaBestieWidget.xcodeproj \
   -target MaBestieWidgetExtension -configuration Debug -sdk iphoneos \
   SYMROOT=/tmp/mabestie-widget-build CODE_SIGNING_ALLOWED=NO build
 ```
+
+The checked-in `.xcodeproj` is generated from `project.yml` with the free XcodeGen tool (`xcodegen generate --spec ios/project.yml --project ios`). XcodeGen is needed only when changing project settings, not to build the checked-in project.
 
 The 14 static pet frames in `MaBestieWidget/Resources` are generated from the web atlases with `python3 ios/scripts/export_widget_frames.py`. This generation step requires Pillow; building the app does not.
 
