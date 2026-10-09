@@ -48,7 +48,7 @@
             <div class="app-content" id="app-content">
                 <section class="screen" id="home-screen" data-screen="home" aria-labelledby="screen-title">
                     <button class="partner-status card" id="partner-status-card" type="button" data-open-dialog="status-dialog">
-                        <span class="avatar-tile"><img id="partner-avatar" src="images/KingJulian.png" alt=""></span>
+                        <span class="pet-tile pet-tile-compact" id="partner-pet" data-pet-sprite aria-hidden="true"><img alt=""></span>
                         <span class="partner-status-copy">
                             <small id="partner-status-name">Julius · status</small>
                             <strong id="partner-status-text">No status yet</strong>
@@ -210,6 +210,9 @@
     <dialog id="status-dialog" class="app-dialog">
         <form method="dialog" id="status-form">
             <div class="dialog-header"><div><p class="eyebrow">Pet status</p><h2>Set your status</h2></div><button class="icon-button" type="button" data-close-dialog="status-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
+            <div class="status-pet-preview" aria-hidden="true">
+                <span class="pet-tile pet-tile-preview" id="status-pet-preview" data-pet-sprite><img alt=""></span>
+            </div>
             <div class="status-options" id="status-options" role="group" aria-label="Status">
                 <button type="button" data-status="At work">At work</button>
                 <button type="button" data-status="Studying">Studying</button>

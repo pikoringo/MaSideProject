@@ -10,12 +10,43 @@ const cloud = globalThis.supabase?.createClient
 const PROFILE_META = {
     Rin: {
         avatar: "images/Mort.png",
+        pet: "tiny_lemur",
         defaultTheme: "lilac"
     },
     Julius: {
         avatar: "images/KingJulian.png",
+        pet: "royal_lemur",
         defaultTheme: "mono"
     }
+};
+
+const PET_META = {
+    royal_lemur: {
+        sprite: "images/pets/royal-lemur-atlas-v1.png",
+        label: "Royal ring-tailed lemur"
+    },
+    tiny_lemur: {
+        sprite: "images/pets/tiny-lemur-atlas-v1.png",
+        label: "Tiny wide-eyed lemur"
+    }
+};
+
+const PET_STATE_META = {
+    idle: { row: 0, frameDuration: 220, stillFrame: 2 },
+    hungry: { row: 1, frameDuration: 180, stillFrame: 3 },
+    busy: { row: 2, frameDuration: 240, stillFrame: 2 },
+    on_my_way: { row: 3, frameDuration: 140, stillFrame: 2 },
+    sleepy: { row: 4, frameDuration: 260, stillFrame: 5 },
+    need_a_hug: { row: 5, frameDuration: 220, stillFrame: 5 },
+    happy: { row: 6, frameDuration: 130, stillFrame: 4 }
+};
+
+const STATUS_TO_PET_STATE = {
+    "At work": "busy",
+    Studying: "busy",
+    "On my way": "on_my_way",
+    Resting: "sleepy",
+    "Need a hug": "need_a_hug"
 };
 
 const LIST_CATEGORY_META = {
@@ -227,6 +258,7 @@ let errandFilter = "all";
 let selectedStatus = "";
 let cloudRefreshTimer = null;
 let cloudChannel = null;
+let petAnimationFrame = null;
 
 const appShell = document.getElementById("app-shell");
 const profileGate = document.getElementById("profile-gate");
@@ -506,11 +538,56 @@ function partnerFor(profile) {
     return profile === "Rin" ? "Julius" : "Rin";
 }
 
+function petStateForStatus(status) {
+    return STATUS_TO_PET_STATE[status] || "idle";
+}
+
+function setPetFrame(element, frame) {
+    const row = Number(element.dataset.petRow || 0);
+    const image = element.querySelector("img");
+    image.style.setProperty("--pet-x", `${frame * (-100 / 6)}%`);
+    image.style.setProperty("--pet-y", `${row * (-100 / 7)}%`);
+}
+
+function configurePetSprite(element, profile, status) {
+    const petId = PROFILE_META[profile]?.pet || "tiny_lemur";
+    const pet = PET_META[petId];
+    const stateKey = petStateForStatus(status);
+    const animation = PET_STATE_META[stateKey];
+    const image = element.querySelector("img");
+
+    image.src = pet.sprite;
+    element.dataset.pet = petId;
+    element.dataset.petState = stateKey;
+    element.dataset.petRow = animation.row;
+    element.dataset.frameDuration = animation.frameDuration;
+    element.dataset.stillFrame = animation.stillFrame;
+    element.setAttribute("title", `${profile}'s ${pet.label}: ${stateKey.replaceAll("_", " ")}`);
+    setPetFrame(element, motionPreference.matches ? animation.stillFrame : 0);
+}
+
+function animatePets(timestamp) {
+    if (!document.hidden && !app.hidden && !motionPreference.matches) {
+        document.querySelectorAll("[data-pet-sprite]").forEach((element) => {
+            const duration = Number(element.dataset.frameDuration || 200);
+            setPetFrame(element, Math.floor(timestamp / duration) % 6);
+        });
+    }
+    petAnimationFrame = requestAnimationFrame(animatePets);
+}
+
+const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function refreshPetMotionPreference() {
+    document.querySelectorAll("[data-pet-sprite]").forEach((element) => {
+        setPetFrame(element, motionPreference.matches ? Number(element.dataset.stillFrame || 0) : 0);
+    });
+}
+
 function renderHome() {
     const partner = partnerFor(state.currentUser);
     const status = state.statuses[partner] || { value: "", message: "", updatedAt: null };
-    document.getElementById("partner-avatar").src = PROFILE_META[partner].avatar;
-    document.getElementById("partner-avatar").alt = `${partner}'s avatar`;
+    configurePetSprite(document.getElementById("partner-pet"), partner, status.value);
     document.getElementById("partner-status-name").textContent = `${partner} · status`;
     document.getElementById("partner-status-text").textContent = status.value || "No status yet";
     document.getElementById("partner-status-time").textContent = status.updatedAt
@@ -899,6 +976,7 @@ function renderNavigation() {
 function openStatusDialog() {
     const status = state.statuses[state.currentUser] || { value: "", message: "" };
     selectedStatus = status.value;
+    configurePetSprite(document.getElementById("status-pet-preview"), state.currentUser, selectedStatus);
     document.getElementById("status-message").value = status.message || "";
     document.querySelectorAll("[data-status]").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.status === selectedStatus));
@@ -970,6 +1048,7 @@ document.querySelectorAll("[data-theme-option]").forEach((button) => {
 document.querySelectorAll("[data-status]").forEach((button) => {
     button.addEventListener("click", () => {
         selectedStatus = button.dataset.status;
+        configurePetSprite(document.getElementById("status-pet-preview"), state.currentUser, selectedStatus);
         document.querySelectorAll("[data-status]").forEach((option) => {
             option.setAttribute("aria-pressed", String(option === button));
         });
@@ -1017,3 +1096,5 @@ document.querySelectorAll("dialog").forEach((dialog) => {
 enterApp();
 refreshFromCloud();
 subscribeToCloud();
+motionPreference.addEventListener("change", refreshPetMotionPreference);
+petAnimationFrame = requestAnimationFrame(animatePets);

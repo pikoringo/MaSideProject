@@ -1,6 +1,6 @@
 # Pet animation specification
 
-**Status:** Concept sprites, version 1
+**Status:** Web animation prototype implemented
 
 MaBestie uses two original pixel pets with a shared animation vocabulary:
 
@@ -25,11 +25,29 @@ The pet is selected per profile. Pet selection and pet state are synchronized so
 
 ## Sprite sources
 
-- [`royal-lemur-sprites-v2.png`](../images/pets/royal-lemur-sprites-v2.png) — current direction: lanky, angular, confident, and comedically theatrical
+- [`royal-lemur-sprites-v3.png`](../images/pets/royal-lemur-sprites-v3.png) — current production prototype with the approved masculine, confident facial direction
+- [`tiny-lemur-sprites-v2.png`](../images/pets/tiny-lemur-sprites-v2.png) — current production prototype with the approved feminine, wide-eyed facial direction
+- [`royal-lemur-sprites-v2.png`](../images/pets/royal-lemur-sprites-v2.png) — retained earlier direction
 - [`royal-lemur-sprites-v1.png`](../images/pets/royal-lemur-sprites-v1.png) — retained as the softer initial exploration
 - [`tiny-lemur-sprites-v1.png`](../images/pets/tiny-lemur-sprites-v1.png)
 
-Each concept sheet contains seven rows in the state order above and six frames per row. Before production use, normalize the generated cells into a deterministic sprite atlas with equal frame dimensions and a shared ground anchor.
+Each current sheet contains seven rows in the state order above and six frames per row. The web prototype treats every sheet as a deterministic 6-by-7 atlas and clips it through a fixed-aspect viewport. A later art-polish pass may still tighten individual ground anchors before the native widget export.
+
+Production web atlases are generated from those concept sheets with [`scripts/normalize_sprite_atlas.py`](../scripts/normalize_sprite_atlas.py). The normalizer isolates each pose, applies a stable scale within each animation row, centers it horizontally, and aligns it to a shared ground line. The app currently loads:
+
+- [`royal-lemur-atlas-v1.png`](../images/pets/royal-lemur-atlas-v1.png)
+- [`tiny-lemur-atlas-v1.png`](../images/pets/tiny-lemur-atlas-v1.png)
+
+Existing status labels map to pet states as follows:
+
+| Status label | Pet state |
+| --- | --- |
+| No status | `idle` |
+| At work | `busy` |
+| Studying | `busy` |
+| On my way | `on_my_way` |
+| Resting | `sleepy` |
+| Need a hug | `need_a_hug` |
 
 ## Playback rules
 
