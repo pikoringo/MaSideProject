@@ -16,6 +16,7 @@ MaBestie is a personal, mobile-friendly web app built for its two users and cont
 - Survival Guide with Japan emergency numbers and Maebashi garbage sorting links
 - Shared errand planning with assignments, due dates, and recurrence
 - Animated pixel-pet status updates in the web app
+- Optional in-app and iPhone Home Screen notifications for statuses and errands
 - Quiet Accent interface with one consistent Lucide icon system
 
 ## Tech stack
@@ -46,6 +47,7 @@ Opening `index.html` directly may work for basic UI development, but using a loc
 V2 connects both users to one Supabase database. Profiles, themes, statuses, list items, errands, and procedure state are shared, while `localStorage` keeps a device cache so the interface can still open when the network is unavailable.
 
 Database setup and authentication enrollment are documented in [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
+Notification deployment and iPhone activation are documented in [docs/NOTIFICATIONS_SETUP.md](docs/NOTIFICATIONS_SETUP.md).
 
 The original Date Ideas entries used a separate `date_ideas` table. See the [legacy recovery migration](supabase/migrations/202610090002_restore_legacy_date_ideas.sql) when upgrading an existing database. The original table is retained as a backup.
 
@@ -66,7 +68,7 @@ Supabase Auth protects database access. The Rin/Julius character picker remains 
 ├── style.css        # Layout and visual styles
 ├── app.js           # V2 state, navigation, and feature logic
 ├── manifest.json    # Web app metadata
-├── sw.js            # Reserved for future service-worker behavior
+├── sw.js            # Web Push delivery and notification-open behavior
 ├── images/          # Profile artwork and app icon
 ├── docs/            # PRD and canonical design rules
 ├── supabase/         # Reproducible database migrations
@@ -91,7 +93,7 @@ The evolving product requirements are documented in [docs/PRD.md](docs/PRD.md). 
 
 ## Known limitations
 
-- The service worker is empty, so cached data does not make every app asset available offline.
+- The service worker handles notifications but does not yet cache every app asset for offline launch.
 - Failed cloud writes stay in the local cache but are not automatically replayed after reconnecting yet.
 - Automated tests and linting are not configured.
 
