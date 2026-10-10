@@ -8,12 +8,27 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/MabestieApp.png" type="image/png">
     <link rel="apple-touch-icon" href="images/MabestieApp.png">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
     <title>MaBestie</title>
 </head>
 <body>
     <main class="app-shell" id="app-shell" data-profile-theme="mono">
-        <section class="profile-gate" id="profile-gate" aria-labelledby="profile-gate-title">
+        <section class="auth-gate" id="auth-gate" aria-labelledby="auth-gate-title">
+            <div class="brand-mark" aria-hidden="true">MB</div>
+            <p class="eyebrow">Private space</p>
+            <h1 id="auth-gate-title">Sign in to MaBestie</h1>
+            <p class="profile-gate-copy">Use your approved email and password. This device will remember your session.</p>
+            <form class="auth-form" id="auth-form">
+                <label class="field-label" for="auth-email">Email</label>
+                <input id="auth-email" type="email" inputmode="email" autocomplete="username" required placeholder="you@example.com">
+                <label class="field-label" for="auth-password">Password</label>
+                <input id="auth-password" type="password" autocomplete="current-password" required>
+                <button class="primary-button block-button" id="auth-submit-button" type="submit">Sign in</button>
+            </form>
+            <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="profile-gate" id="profile-gate" aria-labelledby="profile-gate-title" hidden>
             <div class="brand-mark" aria-hidden="true">MB</div>
             <p class="eyebrow">MaBestie</p>
             <h1 id="profile-gate-title">Which character are you?</h1>
@@ -173,6 +188,11 @@
 
                 <section class="screen" id="settings-screen" data-screen="settings" hidden>
                     <section class="settings-section card">
+                        <div class="settings-heading"><span class="feature-icon"><i data-lucide="shield-check" aria-hidden="true"></i></span><div><h2>Private access</h2><p id="account-email">Signed in securely.</p></div></div>
+                        <button class="secondary-button block-button" id="sign-out-button" type="button"><i data-lucide="log-out" aria-hidden="true"></i>Sign out</button>
+                    </section>
+
+                    <section class="settings-section card">
                         <div class="settings-heading"><span class="feature-icon"><i data-lucide="user-round" aria-hidden="true"></i></span><div><h2>Profile</h2><p>Change the active character on this device.</p></div></div>
                         <div class="segmented-control" role="group" aria-label="Active profile">
                             <button type="button" data-settings-profile="Rin" aria-pressed="false">Rin</button>
@@ -211,7 +231,7 @@
                         </div>
                     </section>
 
-                    <button class="secondary-button block-button" id="forget-profile-button" type="button"><i data-lucide="log-out" aria-hidden="true"></i>Return to character selection</button>
+                    <button class="secondary-button block-button" id="forget-profile-button" type="button"><i data-lucide="user-round" aria-hidden="true"></i>Change character</button>
                 </section>
             </div>
 
@@ -299,6 +319,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/dist/umd/supabase.min.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=3"></script>
 </body>
 </html>

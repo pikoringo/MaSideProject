@@ -4,7 +4,7 @@
 
 **Audience:** The two MaBestie users and contributors
 
-**Last updated:** October 9, 2026
+**Last updated:** October 10, 2026
 
 ## 1. Product summary
 
@@ -24,9 +24,9 @@ The product is intentionally designed for two known users. Public accounts, disc
 
 ## 3. Primary navigation
 
-### Profile selection and app entry
+### Sign-in, profile selection, and app entry
 
-On first launch, the app asks **Which character are you?** The user chooses either **Rin** or **Julius**, then enters the full app with no additional onboarding or feature restrictions.
+On a new device, the app first asks the user to sign in with an approved email address and password. Only the two approved Supabase Auth users can reach shared data. The session is remembered on that device. After sign-in, the app asks **Which character are you?** The user chooses either **Rin** or **Julius**, then enters the full app.
 
 The selected profile determines:
 
@@ -38,7 +38,7 @@ The selected profile determines:
 
 The profile selection is remembered on that device. A user can change profiles later from **Settings → Profile**. Switching profiles changes the active identity and preferences but does not delete or hide shared content.
 
-This character picker is a convenience for the two intended users, not authentication. Either person can select either profile. Authentication or a profile PIN is outside the current scope unless access control becomes necessary later.
+Authentication protects the private shared space. The character picker remains a separate convenience: either approved person can select either character, and the active character can be changed later from **Settings → Profile**. Signing out is also available in Settings.
 
 ### Footer navigation
 
@@ -195,11 +195,11 @@ The web app renders the local cache first, downloads shared state, and subscribe
 
 V1 date ideas used the `date_ideas` table. The six surviving entries were copied into `list_items` on October 9, 2026, preserving their creator and original creation date. The source table remains as a backup; the migration is idempotent and does not replace edited V2 items. Existing V2 Japan procedure progress takes precedence over older `task_progress` rows.
 
-### Current privacy decision
+### Access control
 
-The Rin/Julius character picker remains a convenience, not authentication. For this private prototype, Row Level Security is enabled but permits the Supabase unauthenticated role to read and write all MaBestie rows. This means the data is shared between the intended users, but technical access is not limited to them if the project URL and publishable key are obtained.
+Supabase Auth provides remembered email-and-password sessions. Public signup is disabled, and only the two administrator-created users are enrolled in `app_members`. Row Level Security denies the unauthenticated role and requires both an authenticated session and membership for every shared table operation.
 
-Do not store sensitive information under this policy. Secure two-person access requires a future authentication step and policies tied to approved user identities.
+Authentication identity and character identity intentionally remain separate. A signed-in member can change between Rin and Julius in Settings without changing the account or ending the session.
 
 ## 7. Non-goals for the next release
 

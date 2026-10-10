@@ -102,12 +102,33 @@ button:disabled {
     background: var(--background);
 }
 
+.auth-gate,
 .profile-gate {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: max(32px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
+}
+
+.auth-form {
+    display: grid;
+    gap: 8px;
+}
+
+.auth-form .primary-button {
+    margin-top: 8px;
+}
+
+.auth-message {
+    min-height: 21px;
+    margin: 16px 0 0;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.auth-message[data-state="error"] {
+    color: var(--danger);
 }
 
 .brand-mark {

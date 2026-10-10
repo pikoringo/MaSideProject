@@ -226,7 +226,9 @@ Use **Lucide** as the only interface icon family. Lucide's outline style matches
 | Both users | `users-round` |
 | Profile theme | `palette` |
 | Pickup or parcel | `package` |
-| Return to profile selection | `log-out` |
+| Private access | `shield-check` |
+| Change character | `user-round` |
+| Sign out | `log-out` |
 
 If a concept is not in this table, add it here before using a new icon.
 
