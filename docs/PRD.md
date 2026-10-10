@@ -104,10 +104,13 @@ Each errand should support:
 - Assignee: User A, User B, both, or unassigned
 - Due date or no due date
 - Optional recurring schedule
+- Normal or urgent priority
 - Open or completed state
 - Creator and completion metadata
 
 The default view shows open errands first, with compact summaries for open, due-today, and recurring items. Completed errands can be hidden from the default view without being deleted.
+
+Recurring errands require a due date. Completing one preserves the completed occurrence and creates the next weekly or monthly occurrence with an advanced due date.
 
 ### 4.4 Survival Guide
 
@@ -159,6 +162,32 @@ Initial profile themes:
 
 Coral is reserved for affectionate or status-related highlights in Rin's theme. It is not a general-purpose surface color.
 
+### 4.7 Notifications
+
+MaBestie supports in-app notifications while open and standards-based Web Push while the installed Home Screen app is closed. Notifications are account-specific rather than character-specific. A notification caused by one signed-in account is delivered only to the other account.
+
+Default preferences:
+
+- Partner status updates: on
+- Urgent errands: on
+- New errands assigned to the recipient or both users: on
+- Errands due today: on
+- Recurring errands due again: on
+- Errand completion: off
+- New additions to The List: off
+
+Requirements:
+
+- Request system notification permission only after the user taps **Enable notifications**.
+- Keep a master device subscription control plus separate synchronized preference switches in Settings.
+- Never notify the account that performed the action.
+- Do not notify for theme, pet, notes-only, or other nonessential edits.
+- Avoid duplicate notifications for the same account, event, and occurrence.
+- Tapping a notification opens the relevant MaBestie screen.
+- When system notifications are unsupported or denied, retain the same preference controls and show in-app notifications while MaBestie is open.
+- Schedule due and recurring reminders in Japan time. The initial reminder time is 09:00.
+- Do not require an Apple Developer Program membership or a paid notification provider.
+
 ## 5. Design direction
 
 ### Quiet Accent
@@ -190,6 +219,9 @@ V2 uses these tables:
 - `procedure_lists`: active or archived Japan list metadata and archive date
 - `procedure_progress`: completion state and completing profile for each task
 - `errands`: category, assignment, scheduling, notes, completion metadata, and timestamps
+- `notification_preferences`: per-account notification choices
+- `push_subscriptions`: per-device Web Push endpoints owned by an authenticated account
+- `notification_deliveries`: deduplication records for scheduled reminders
 
 The web app renders the local cache first, downloads shared state, and subscribes to Realtime database changes. If the cloud is empty, the first connected device initializes shared collections from its cache. An archive is a reversible state update; it does not delete the procedure list or progress.
 
@@ -218,4 +250,7 @@ Authentication identity and character identity intentionally remain separate. A 
 - Archiving a completed Japan list removes Japan from the footer.
 - Settings exposes the archived list and can restore it.
 - Settings demonstrates distinct saved theme choices for each user.
+- Settings exposes synchronized notification preferences with List alerts off by default.
+- Status updates, urgent errands, assigned errands, and due or recurring reminders can reach the other account without notifying the actor.
+- Completing a dated recurring errand creates its next occurrence.
 - The visual system follows Quiet Accent: a neutral base, flat surfaces, system typography, restrained per-user accents, and one consistent outline icon family.

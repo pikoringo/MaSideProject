@@ -49,6 +49,16 @@ const STATUS_TO_PET_STATE = {
     "Need a hug": "need_a_hug"
 };
 
+const DEFAULT_NOTIFICATION_PREFERENCES = {
+    statusUpdates: true,
+    urgentErrands: true,
+    assignedErrands: true,
+    dueReminders: true,
+    recurringReminders: true,
+    errandCompleted: false,
+    listAdditions: false
+};
+
 const LIST_CATEGORY_META = {
     movies: { label: "Movies", icon: "clapperboard" },
     places: { label: "Places to go", icon: "map-pin" },
@@ -184,7 +194,8 @@ function createInitialState() {
         ],
         procedureProgress,
         proceduresArchived: false,
-        proceduresArchivedAt: null
+        proceduresArchivedAt: null,
+        notificationPreferences: { ...DEFAULT_NOTIFICATION_PREFERENCES }
     };
 }
 
@@ -207,6 +218,7 @@ function createSeedErrand(title, category, assignee, dueDate, recurrence, notes)
         assignee,
         dueDate,
         recurrence,
+        priority: "normal",
         notes,
         completed: false,
         createdAt: new Date().toISOString()
@@ -229,6 +241,23 @@ function today() {
     return `${year}-${month}-${day}`;
 }
 
+function nextRecurringDueDate(dueDate, recurrence) {
+    if (!dueDate || !recurrence) return "";
+    const [year, month, day] = dueDate.split("-").map(Number);
+    const next = new Date(year, month - 1, day);
+    if (recurrence === "weekly") next.setDate(next.getDate() + 7);
+    if (recurrence === "monthly") {
+        const targetMonth = month;
+        const targetYear = year + Math.floor(targetMonth / 12);
+        const normalizedMonth = targetMonth % 12;
+        const lastDay = new Date(targetYear, normalizedMonth + 1, 0).getDate();
+        next.setFullYear(targetYear, normalizedMonth, Math.min(day, lastDay));
+    }
+    const nextMonth = String(next.getMonth() + 1).padStart(2, "0");
+    const nextDay = String(next.getDate()).padStart(2, "0");
+    return `${next.getFullYear()}-${nextMonth}-${nextDay}`;
+}
+
 function loadState() {
     try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -244,6 +273,7 @@ function loadState() {
             themes: { ...initial.themes, ...saved.themes },
             pets: { ...initial.pets, ...saved.pets },
             statuses: { ...initial.statuses, ...saved.statuses },
+            notificationPreferences: { ...initial.notificationPreferences, ...saved.notificationPreferences },
             listItems: Array.isArray(saved.listItems) ? saved.listItems : initial.listItems,
             errands: Array.isArray(saved.errands) ? saved.errands : initial.errands,
             procedureProgress: { ...initial.procedureProgress, ...saved.procedureProgress }
@@ -264,6 +294,8 @@ let cloudRefreshTimer = null;
 let cloudChannel = null;
 let petAnimationFrame = null;
 let authSession = null;
+let notificationToastTimer = null;
+let serviceWorkerRegistration = null;
 
 const appShell = document.getElementById("app-shell");
 const authGate = document.getElementById("auth-gate");
@@ -291,6 +323,7 @@ function fromListRow(row) {
         description: row.description || "",
         createdBy: row.created_by,
         createdAt: row.created_at,
+        createdByUserId: row.created_by_user_id || null,
         updatedAt: row.updated_at
     };
 }
@@ -302,7 +335,8 @@ function toListRow(item) {
         category: item.category,
         description: item.description || "",
         created_by: item.createdBy || state.currentUser,
-        created_at: item.createdAt || new Date().toISOString()
+        created_at: item.createdAt || new Date().toISOString(),
+        created_by_user_id: item.createdByUserId || authSession?.user?.id || null
     };
 }
 
@@ -314,12 +348,15 @@ function fromErrandRow(row) {
         assignee: row.assignee,
         dueDate: row.due_date || "",
         recurrence: row.recurrence || "",
+        priority: row.priority || "normal",
         notes: row.notes || "",
         completed: row.completed,
         createdBy: row.created_by,
         completedBy: row.completed_by,
         completedAt: row.completed_at,
         createdAt: row.created_at,
+        createdByUserId: row.created_by_user_id || null,
+        updatedByUserId: row.updated_by_user_id || null,
         updatedAt: row.updated_at
     };
 }
@@ -332,24 +369,53 @@ function toErrandRow(errand) {
         assignee: errand.assignee || "unassigned",
         due_date: errand.dueDate || null,
         recurrence: errand.recurrence || "",
+        priority: errand.priority || "normal",
         notes: errand.notes || "",
         completed: Boolean(errand.completed),
         created_by: errand.createdBy || state.currentUser,
         completed_by: errand.completed ? (errand.completedBy || state.currentUser) : null,
         completed_at: errand.completed ? (errand.completedAt || new Date().toISOString()) : null,
-        created_at: errand.createdAt || new Date().toISOString()
+        created_at: errand.createdAt || new Date().toISOString(),
+        created_by_user_id: errand.createdByUserId || authSession?.user?.id || null,
+        updated_by_user_id: authSession?.user?.id || errand.updatedByUserId || null
+    };
+}
+
+function fromNotificationPreferences(row) {
+    return {
+        statusUpdates: row?.status_updates ?? true,
+        urgentErrands: row?.urgent_errands ?? true,
+        assignedErrands: row?.assigned_errands ?? true,
+        dueReminders: row?.due_reminders ?? true,
+        recurringReminders: row?.recurring_reminders ?? true,
+        errandCompleted: row?.errand_completed ?? false,
+        listAdditions: row?.list_additions ?? false
+    };
+}
+
+function toNotificationPreferencesRow() {
+    return {
+        user_id: authSession.user.id,
+        status_updates: state.notificationPreferences.statusUpdates,
+        urgent_errands: state.notificationPreferences.urgentErrands,
+        assigned_errands: state.notificationPreferences.assignedErrands,
+        due_reminders: state.notificationPreferences.dueReminders,
+        recurring_reminders: state.notificationPreferences.recurringReminders,
+        errand_completed: state.notificationPreferences.errandCompleted,
+        list_additions: state.notificationPreferences.listAdditions
     };
 }
 
 async function querySharedState() {
-    const [profilesResult, listResult, procedureListResult, progressResult, errandsResult] = await Promise.all([
+    const [profilesResult, listResult, procedureListResult, progressResult, errandsResult, preferencesResult] = await Promise.all([
         cloud.from("profiles").select("*"),
         cloud.from("list_items").select("*").order("created_at"),
         cloud.from("procedure_lists").select("*").eq("id", PROCEDURE_LIST_ID).single(),
         cloud.from("procedure_progress").select("*").eq("list_id", PROCEDURE_LIST_ID),
-        cloud.from("errands").select("*").order("created_at")
+        cloud.from("errands").select("*").order("created_at"),
+        cloud.from("notification_preferences").select("*").eq("user_id", authSession.user.id).maybeSingle()
     ]);
-    const error = [profilesResult, listResult, procedureListResult, progressResult, errandsResult]
+    const error = [profilesResult, listResult, procedureListResult, progressResult, errandsResult, preferencesResult]
         .find((result) => result.error)?.error;
     if (error) throw error;
     return {
@@ -357,7 +423,8 @@ async function querySharedState() {
         listItems: listResult.data,
         procedureList: procedureListResult.data,
         progress: progressResult.data,
-        errands: errandsResult.data
+        errands: errandsResult.data,
+        notificationPreferences: preferencesResult.data
     };
 }
 
@@ -374,6 +441,9 @@ async function initializeEmptyCollections(remote) {
             .filter(([, completed]) => completed)
             .map(([taskId]) => ({ list_id: PROCEDURE_LIST_ID, task_id: taskId, completed: true, completed_by: state.currentUser }));
         if (completedRows.length) writes.push(cloud.from("procedure_progress").upsert(completedRows));
+    }
+    if (!remote.notificationPreferences && authSession) {
+        writes.push(cloud.from("notification_preferences").upsert(toNotificationPreferencesRow()));
     }
     const results = await Promise.all(writes);
     const error = results.find((result) => result.error)?.error;
@@ -394,6 +464,7 @@ function applySharedState(remote) {
     });
     state.listItems = remote.listItems.map(fromListRow);
     state.errands = remote.errands.map(fromErrandRow);
+    state.notificationPreferences = fromNotificationPreferences(remote.notificationPreferences);
     state.procedureProgress = Object.fromEntries(PROCEDURES.map((procedure) => [procedure.id, false]));
     remote.progress.forEach((row) => {
         if (Object.hasOwn(state.procedureProgress, row.task_id)) state.procedureProgress[row.task_id] = row.completed;
@@ -431,7 +502,10 @@ function subscribeToCloud() {
     if (!cloud || cloudChannel) return;
     cloudChannel = cloud.channel("mabestie-v2");
     ["profiles", "list_items", "procedure_lists", "procedure_progress", "errands"].forEach((table) => {
-        cloudChannel.on("postgres_changes", { event: "*", schema: "public", table }, scheduleCloudRefresh);
+        cloudChannel.on("postgres_changes", { event: "*", schema: "public", table }, (payload) => {
+            handleRealtimeNotification(table, payload);
+            scheduleCloudRefresh();
+        });
     });
     cloudChannel.subscribe((status) => {
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setSyncStatus("Local only", "pending");
@@ -439,20 +513,22 @@ function subscribeToCloud() {
 }
 
 async function writeToCloud(operation) {
-    if (!cloud) return;
+    if (!cloud) return false;
     setSyncStatus("Saving…");
     try {
         const { error } = await operation;
         if (error) throw error;
         setSyncStatus("Shared & current", "synced");
+        return true;
     } catch (error) {
         setSyncStatus("Changes pending", "pending");
         console.warn("The change is saved locally but has not reached Supabase.", error);
+        return false;
     }
 }
 
 function syncProfile(profile) {
-    if (!cloud) return;
+    if (!cloud) return Promise.resolve(false);
     const status = state.statuses[profile] || {};
     return writeToCloud(cloud.from("profiles").upsert({
         name: profile,
@@ -461,8 +537,52 @@ function syncProfile(profile) {
         pet_state: PET_STATE_META[status.petState] ? status.petState : petStateForStatus(status.value),
         status: status.value || "",
         status_message: status.message || "",
-        status_updated_at: status.updatedAt || null
+        status_updated_at: status.updatedAt || null,
+        status_updated_by: authSession?.user?.id || null
     }));
+}
+
+function showNotificationToast(title, body) {
+    const toast = document.getElementById("notification-toast");
+    document.getElementById("notification-toast-title").textContent = title;
+    document.getElementById("notification-toast-body").textContent = body;
+    toast.hidden = false;
+    clearTimeout(notificationToastTimer);
+    notificationToastTimer = setTimeout(() => {
+        toast.hidden = true;
+    }, 5000);
+    refreshIcons();
+}
+
+function isPartnerChange(record, actorField) {
+    return Boolean(authSession?.user?.id && record?.[actorField] && record[actorField] !== authSession.user.id);
+}
+
+function handleRealtimeNotification(table, payload) {
+    if (!authSession || document.hidden) return;
+    const record = payload.new || {};
+
+    if (table === "profiles" && payload.eventType === "UPDATE" && isPartnerChange(record, "status_updated_by")) {
+        const previous = state.statuses[record.name] || {};
+        const statusChanged = previous.value !== record.status || previous.message !== record.status_message || previous.petState !== record.pet_state;
+        if (statusChanged && state.notificationPreferences.statusUpdates) {
+            showNotificationToast(`${record.name} updated their status`, record.status_message || record.status || "New status");
+        }
+    }
+
+    if (table === "list_items" && payload.eventType === "INSERT" && isPartnerChange(record, "created_by_user_id") && state.notificationPreferences.listAdditions) {
+        showNotificationToast("New on The List", `${record.created_by || "Your partner"} added ${record.title}`);
+    }
+
+    if (table === "errands" && isPartnerChange(record, "updated_by_user_id")) {
+        if (payload.eventType === "INSERT") {
+            const urgent = record.priority === "urgent" && state.notificationPreferences.urgentErrands;
+            const assigned = (record.assignee === state.currentUser || record.assignee === "both") && state.notificationPreferences.assignedErrands;
+            if (urgent || assigned) showNotificationToast(urgent ? "Urgent errand" : "New assigned errand", record.title);
+        } else if (payload.eventType === "UPDATE" && record.completed && !state.errands.find((errand) => errand.id === record.id)?.completed && state.notificationPreferences.errandCompleted) {
+            showNotificationToast("Errand completed", record.title);
+        }
+    }
 }
 
 function refreshIcons() {
@@ -509,7 +629,9 @@ function enterApp() {
     app.hidden = false;
     applyTheme();
     renderAll();
-    navigate("home");
+    const requestedScreen = new URLSearchParams(window.location.search).get("screen");
+    navigate(SCREEN_META[requestedScreen] ? requestedScreen : "home");
+    if (requestedScreen) window.history.replaceState({}, "", window.location.pathname);
 }
 
 function applyTheme() {
@@ -687,6 +809,7 @@ function saveListItem() {
     if (!title) return;
 
     const existing = state.listItems.find((item) => item.id === id);
+    const isNew = !existing;
     const values = {
         title,
         category: document.getElementById("list-item-category").value,
@@ -702,6 +825,7 @@ function saveListItem() {
             id: makeId(),
             ...values,
             createdBy: state.currentUser,
+            createdByUserId: authSession?.user?.id || null,
             createdAt: new Date().toISOString()
         };
         state.listItems.push(savedItem);
@@ -710,7 +834,11 @@ function saveListItem() {
     saveState();
     document.getElementById("list-item-dialog").close();
     renderAll();
-    if (cloud) writeToCloud(cloud.from("list_items").upsert(toListRow(savedItem)));
+    if (cloud) {
+        writeToCloud(cloud.from("list_items").upsert(toListRow(savedItem))).then((saved) => {
+            if (saved && isNew) requestPartnerNotification("list_added", savedItem.id);
+        });
+    }
 }
 
 function deleteListItem() {
@@ -866,9 +994,32 @@ function renderErrands() {
             errand.completed = !errand.completed;
             errand.completedBy = errand.completed ? state.currentUser : null;
             errand.completedAt = errand.completed ? new Date().toISOString() : null;
+            errand.updatedByUserId = authSession?.user?.id || null;
+            let nextErrand = null;
+            if (errand.completed && errand.recurrence && errand.dueDate) {
+                nextErrand = {
+                    ...errand,
+                    id: makeId(),
+                    dueDate: nextRecurringDueDate(errand.dueDate, errand.recurrence),
+                    completed: false,
+                    completedBy: null,
+                    completedAt: null,
+                    createdBy: state.currentUser,
+                    createdByUserId: authSession?.user?.id || null,
+                    updatedByUserId: authSession?.user?.id || null,
+                    createdAt: new Date().toISOString()
+                };
+                state.errands.push(nextErrand);
+            }
             saveState();
             renderAll();
-            if (cloud) writeToCloud(cloud.from("errands").upsert(toErrandRow(errand)));
+            if (cloud) {
+                const rows = [toErrandRow(errand)];
+                if (nextErrand) rows.push(toErrandRow(nextErrand));
+                writeToCloud(cloud.from("errands").upsert(rows)).then((saved) => {
+                    if (saved && errand.completed) requestPartnerNotification("errand_completed", errand.id);
+                });
+            }
         });
 
         const copyButton = document.createElement("button");
@@ -903,6 +1054,7 @@ function renderErrands() {
 
 function formatErrandDetail(errand, categoryLabel) {
     const parts = [categoryLabel];
+    if (errand.priority === "urgent") parts.unshift("Urgent");
     if (errand.assignee && errand.assignee !== "unassigned") {
         parts.push(errand.assignee === "both" ? "Both" : errand.assignee);
     }
@@ -919,6 +1071,7 @@ function openErrandDialog(id = "") {
     document.getElementById("errand-assignee").value = errand?.assignee || state.currentUser;
     document.getElementById("errand-due-date").value = errand?.dueDate || "";
     document.getElementById("errand-recurrence").value = errand?.recurrence || "";
+    document.getElementById("errand-urgent").checked = errand?.priority === "urgent";
     document.getElementById("errand-notes").value = errand?.notes || "";
     document.getElementById("errand-dialog-title").textContent = errand ? "Edit errand" : "Add an errand";
     document.getElementById("delete-errand-button").hidden = !errand;
@@ -932,18 +1085,25 @@ function saveErrand() {
     if (!title) return;
 
     const existing = state.errands.find((errand) => errand.id === id);
+    const isNew = !existing;
+    const dueDateInput = document.getElementById("errand-due-date");
+    const recurrence = document.getElementById("errand-recurrence").value;
+    dueDateInput.setCustomValidity(recurrence && !dueDateInput.value ? "Choose a due date for a recurring errand." : "");
+    if (!dueDateInput.reportValidity()) return;
     const values = {
         title,
         category: document.getElementById("errand-category").value,
         assignee: document.getElementById("errand-assignee").value,
-        dueDate: document.getElementById("errand-due-date").value,
-        recurrence: document.getElementById("errand-recurrence").value,
+        dueDate: dueDateInput.value,
+        recurrence,
+        priority: document.getElementById("errand-urgent").checked ? "urgent" : "normal",
         notes: document.getElementById("errand-notes").value.trim()
     };
 
     let savedErrand;
     if (existing) {
         Object.assign(existing, values, { updatedAt: new Date().toISOString() });
+        existing.updatedByUserId = authSession?.user?.id || null;
         savedErrand = existing;
     } else {
         savedErrand = {
@@ -951,6 +1111,8 @@ function saveErrand() {
             ...values,
             completed: false,
             createdBy: state.currentUser,
+            createdByUserId: authSession?.user?.id || null,
+            updatedByUserId: authSession?.user?.id || null,
             createdAt: new Date().toISOString()
         };
         state.errands.push(savedErrand);
@@ -959,7 +1121,11 @@ function saveErrand() {
     saveState();
     document.getElementById("errand-dialog").close();
     renderAll();
-    if (cloud) writeToCloud(cloud.from("errands").upsert(toErrandRow(savedErrand)));
+    if (cloud) {
+        writeToCloud(cloud.from("errands").upsert(toErrandRow(savedErrand))).then((saved) => {
+            if (saved && isNew) requestPartnerNotification("errand_added", savedErrand.id);
+        });
+    }
 }
 
 function deleteErrand() {
@@ -969,6 +1135,120 @@ function deleteErrand() {
     document.getElementById("errand-dialog").close();
     renderAll();
     if (cloud) writeToCloud(cloud.from("errands").delete().eq("id", id));
+}
+
+function supportsSystemNotifications() {
+    return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+}
+
+function decodeApplicationServerKey(value) {
+    const padding = "=".repeat((4 - value.length % 4) % 4);
+    const base64 = (value + padding).replaceAll("-", "+").replaceAll("_", "/");
+    return Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+}
+
+async function registerNotificationServiceWorker() {
+    if (!supportsSystemNotifications()) return null;
+    if (!serviceWorkerRegistration) {
+        serviceWorkerRegistration = await navigator.serviceWorker.register("sw.js");
+    }
+    return serviceWorkerRegistration;
+}
+
+async function currentPushSubscription() {
+    const registration = await registerNotificationServiceWorker();
+    return registration ? registration.pushManager.getSubscription() : null;
+}
+
+async function renderNotificationControls() {
+    const copy = document.getElementById("notification-support-copy");
+    const button = document.getElementById("notification-permission-button");
+    document.querySelectorAll("[data-notification-preference]").forEach((input) => {
+        input.checked = Boolean(state.notificationPreferences[input.dataset.notificationPreference]);
+    });
+
+    if (!supportsSystemNotifications()) {
+        copy.textContent = "System notifications are unavailable here. In-app alerts still work.";
+        button.innerHTML = '<i data-lucide="bell-off" aria-hidden="true"></i>System notifications unavailable';
+        button.disabled = true;
+        refreshIcons();
+        return;
+    }
+
+    if (Notification.permission === "denied") {
+        copy.textContent = "Notifications are blocked in this device's settings. In-app alerts still work.";
+        button.innerHTML = '<i data-lucide="bell-off" aria-hidden="true"></i>Notifications blocked';
+        button.disabled = true;
+        refreshIcons();
+        return;
+    }
+
+    const subscription = await currentPushSubscription();
+    button.disabled = false;
+    if (subscription) {
+        copy.textContent = "System notifications are enabled on this device.";
+        button.innerHTML = '<i data-lucide="bell-off" aria-hidden="true"></i>Disable on this device';
+        button.dataset.action = "disable";
+    } else {
+        const installedOnIos = !/iPad|iPhone|iPod/.test(navigator.userAgent) || window.matchMedia("(display-mode: standalone)").matches;
+        copy.textContent = installedOnIos ? "Enable alerts even when MaBestie is closed." : "On iPhone, add MaBestie to the Home Screen first.";
+        button.innerHTML = '<i data-lucide="bell-ring" aria-hidden="true"></i>Enable notifications';
+        button.dataset.action = "enable";
+    }
+    refreshIcons();
+}
+
+async function enableSystemNotifications() {
+    const copy = document.getElementById("notification-support-copy");
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+        await renderNotificationControls();
+        return;
+    }
+
+    const { data, error } = await cloud.functions.invoke("push-notifications", { body: { action: "config" } });
+    if (error || !data?.publicKey) {
+        copy.textContent = "Notification delivery still needs server setup. In-app alerts are active.";
+        return;
+    }
+
+    const registration = await registerNotificationServiceWorker();
+    const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: decodeApplicationServerKey(data.publicKey)
+    });
+    const serialized = subscription.toJSON();
+    const { error: saveError } = await cloud.from("push_subscriptions").upsert({
+        user_id: authSession.user.id,
+        endpoint: serialized.endpoint,
+        p256dh: serialized.keys.p256dh,
+        auth_secret: serialized.keys.auth
+    }, { onConflict: "endpoint" });
+    if (saveError) throw saveError;
+    await renderNotificationControls();
+}
+
+async function disableSystemNotifications() {
+    const subscription = await currentPushSubscription();
+    if (subscription) {
+        await cloud.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
+        await subscription.unsubscribe();
+    }
+    await renderNotificationControls();
+}
+
+async function saveNotificationPreferences() {
+    saveState();
+    if (!cloud || !authSession) return;
+    await writeToCloud(cloud.from("notification_preferences").upsert(toNotificationPreferencesRow()));
+}
+
+async function requestPartnerNotification(action, recordId, extra = {}) {
+    if (!cloud || !authSession) return;
+    const { error } = await cloud.functions.invoke("push-notifications", {
+        body: { action, recordId, actorProfile: state.currentUser, ...extra }
+    });
+    if (error) console.warn("The change synced, but its push notification could not be sent.", error);
 }
 
 function renderSettings() {
@@ -992,6 +1272,10 @@ function renderSettings() {
     if (state.proceduresArchivedAt) {
         document.getElementById("archive-date").textContent = `Archived ${new Date(state.proceduresArchivedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`;
     }
+    renderNotificationControls().catch((error) => {
+        document.getElementById("notification-support-copy").textContent = "In-app alerts are active. System notification status is unavailable.";
+        console.warn("Could not read the device notification subscription.", error);
+    });
 }
 
 function renderNavigation() {
@@ -1024,7 +1308,9 @@ function saveStatus() {
     saveState();
     document.getElementById("status-dialog").close();
     renderAll();
-    syncProfile(state.currentUser);
+    syncProfile(state.currentUser).then((saved) => {
+        if (saved) requestPartnerNotification("status_updated", state.currentUser);
+    });
 }
 
 document.querySelectorAll("[data-select-profile]").forEach((button) => {
@@ -1082,6 +1368,29 @@ document.querySelectorAll("[data-pet-option]").forEach((button) => {
         renderAll();
         syncProfile(state.currentUser);
     });
+});
+
+document.querySelectorAll("[data-notification-preference]").forEach((input) => {
+    input.addEventListener("change", () => {
+        state.notificationPreferences[input.dataset.notificationPreference] = input.checked;
+        saveNotificationPreferences();
+    });
+});
+
+document.getElementById("notification-permission-button").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+        if (button.dataset.action === "disable") {
+            await disableSystemNotifications();
+        } else {
+            await enableSystemNotifications();
+        }
+    } catch (error) {
+        button.disabled = false;
+        document.getElementById("notification-support-copy").textContent = "System notifications could not be changed. In-app alerts still work.";
+        console.warn("Could not update system notifications.", error);
+    }
 });
 
 document.querySelectorAll("[data-status]").forEach((button) => {
@@ -1163,6 +1472,13 @@ document.getElementById("auth-form").addEventListener("submit", async (event) =>
 
 document.getElementById("sign-out-button").addEventListener("click", async () => {
     if (!cloud) return;
+    if (supportsSystemNotifications()) {
+        try {
+            await disableSystemNotifications();
+        } catch (error) {
+            console.warn("The local push subscription could not be removed before sign-out.", error);
+        }
+    }
     await cloud.auth.signOut();
 });
 
@@ -1186,6 +1502,7 @@ async function initializeApp() {
     authSession = data.session;
     enterApp();
     if (authSession) {
+        registerNotificationServiceWorker().catch((error) => console.warn("The notification service worker is unavailable.", error));
         await refreshFromCloud();
         subscribeToCloud();
     }
@@ -1199,8 +1516,17 @@ async function initializeApp() {
         }
         enterApp();
         if (session && event === "SIGNED_IN") {
+            registerNotificationServiceWorker().catch((error) => console.warn("The notification service worker is unavailable.", error));
             refreshFromCloud();
             subscribeToCloud();
+        }
+    });
+}
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data?.type === "MABESTIE_NOTIFICATION") {
+            showNotificationToast(event.data.title || "MaBestie", event.data.body || "You have an update.");
         }
     });
 }

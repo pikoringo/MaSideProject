@@ -1,10 +1,12 @@
 {
     "name": "MABESTIE",
     "short_name": "MABESTIE",
+    "id": ".",
     "start_url": ".",
+    "scope": ".",
     "display": "standalone",
-    "background_color": "#fff8fa",
-    "theme_color": "#e8a6b5",
+    "background_color": "#fafafa",
+    "theme_color": "#fafafa",
     "icons": [
         {
             "src": "images/MabestieApp.png",
