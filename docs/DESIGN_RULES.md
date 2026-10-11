@@ -2,7 +2,7 @@
 
 **Canonical direction:** Quiet Accent
 
-**Last updated:** October 7, 2026
+**Last updated:** October 10, 2026
 
 All UI work must follow this document. If a new component or icon is needed, extend this system deliberately instead of introducing a one-off style.
 
@@ -167,6 +167,14 @@ Rin's dark appearance uses:
 - Use `--affection` only for current partner status or affectionate signals in Rin's theme.
 - Stale status must be communicated in text, not only by fading or color.
 
+### Notifications and switches
+
+- Group notification preferences in one Settings card rather than scattering controls across features.
+- Use a labeled switch row with a short consequence statement; never use an icon-only notification control.
+- The master permission action is a full-width secondary button until browser permission is granted.
+- Show unsupported, denied, and enabled states in text. Do not rely on the switch position alone.
+- Use a compact neutral toast for in-app notifications. Only one toast is visible at a time, and it must remain readable without motion.
+
 ### Motion
 
 - Use 150–250ms transitions for filtering, selection, dialogs, and archive changes.
@@ -229,6 +237,10 @@ Use **Lucide** as the only interface icon family. Lucide's outline style matches
 | Private access | `shield-check` |
 | Change character | `user-round` |
 | Sign out | `log-out` |
+| Notifications | `bell` |
+| Notifications enabled | `bell-ring` |
+| Notifications disabled | `bell-off` |
+| Urgent | `circle-alert` |
 
 If a concept is not in this table, add it here before using a new icon.
 

@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/MabestieApp.png" type="image/png">
     <link rel="apple-touch-icon" href="images/MabestieApp.png">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
     <title>MaBestie</title>
 </head>
 <body>
@@ -172,6 +172,7 @@
                     </div>
                     <div class="filter-row" id="errand-filters" role="group" aria-label="Filter errands">
                         <button class="filter-chip" type="button" data-errand-filter="all" aria-pressed="true">All</button>
+                        <button class="filter-chip" type="button" data-errand-filter="completed" aria-pressed="false">Completed</button>
                         <button class="filter-chip" type="button" data-errand-filter="groceries" aria-pressed="false">Groceries</button>
                         <button class="filter-chip" type="button" data-errand-filter="pickup" aria-pressed="false">Pickup</button>
                         <button class="filter-chip" type="button" data-errand-filter="home" aria-pressed="false">Home</button>
@@ -180,8 +181,8 @@
                     <div class="item-list" id="errand-items"></div>
                     <div class="empty-state" id="errands-empty" hidden>
                         <i data-lucide="shopping-basket" aria-hidden="true"></i>
-                        <h2>No open errands</h2>
-                        <p>You are all caught up.</p>
+                        <h2 id="errands-empty-title">No open errands</h2>
+                        <p id="errands-empty-copy">You are all caught up.</p>
                     </div>
                     <button class="primary-button block-button" id="add-errand-button" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add an errand</button>
                 </section>
@@ -190,6 +191,20 @@
                     <section class="settings-section card">
                         <div class="settings-heading"><span class="feature-icon"><i data-lucide="shield-check" aria-hidden="true"></i></span><div><h2>Private access</h2><p id="account-email">Signed in securely.</p></div></div>
                         <button class="secondary-button block-button" id="sign-out-button" type="button"><i data-lucide="log-out" aria-hidden="true"></i>Sign out</button>
+                    </section>
+
+                    <section class="settings-section card" id="notification-settings">
+                        <div class="settings-heading"><span class="feature-icon"><i data-lucide="bell" aria-hidden="true"></i></span><div><h2>Notifications</h2><p id="notification-support-copy">Choose what deserves your attention.</p></div></div>
+                        <button class="secondary-button block-button" id="notification-permission-button" type="button"><i data-lucide="bell-ring" aria-hidden="true"></i>Enable notifications</button>
+                        <div class="preference-list" id="notification-preferences">
+                            <label class="preference-row"><span><strong>Status updates</strong><small>When your partner changes their status</small></span><input type="checkbox" data-notification-preference="statusUpdates" checked></label>
+                            <label class="preference-row"><span><strong>Urgent errands</strong><small>Important errands added by your partner</small></span><input type="checkbox" data-notification-preference="urgentErrands" checked></label>
+                            <label class="preference-row"><span><strong>Assigned errands</strong><small>New errands assigned to you or both</small></span><input type="checkbox" data-notification-preference="assignedErrands" checked></label>
+                            <label class="preference-row"><span><strong>Due reminders</strong><small>Open errands due today</small></span><input type="checkbox" data-notification-preference="dueReminders"></label>
+                            <label class="preference-row"><span><strong>Recurring reminders</strong><small>Weekly or monthly errands due again</small></span><input type="checkbox" data-notification-preference="recurringReminders"></label>
+                            <label class="preference-row"><span><strong>Completed errands</strong><small>When your partner completes an errand</small></span><input type="checkbox" data-notification-preference="errandCompleted"></label>
+                            <label class="preference-row"><span><strong>The List</strong><small>When your partner adds something new</small></span><input type="checkbox" data-notification-preference="listAdditions"></label>
+                        </div>
                     </section>
 
                     <section class="settings-section card">
@@ -273,6 +288,7 @@
             </div>
             <label class="field-label" for="errand-recurrence">Repeats</label>
             <select id="errand-recurrence"><option value="">Does not repeat</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+            <label class="preference-row compact-preference"><span><strong>Urgent</strong><small>Notify your partner immediately</small></span><input id="errand-urgent" type="checkbox"></label>
             <label class="field-label" for="errand-notes">Notes</label>
             <textarea id="errand-notes" rows="3" maxlength="500"></textarea>
             <div class="dialog-actions"><button class="danger-button" id="delete-errand-button" type="button"><i data-lucide="trash-2" aria-hidden="true"></i>Delete</button><button class="primary-button" type="submit"><i data-lucide="check" aria-hidden="true"></i>Save</button></div>
@@ -317,8 +333,10 @@
         </form>
     </dialog>
 
+    <div class="notification-toast" id="notification-toast" role="status" aria-live="polite" hidden><i data-lucide="bell" aria-hidden="true"></i><span><strong id="notification-toast-title"></strong><small id="notification-toast-body"></small></span></div>
+
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/dist/umd/supabase.min.js"></script>
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>

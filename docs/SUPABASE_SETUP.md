@@ -48,6 +48,8 @@ The normal sign-in flow does not send email, so it does not depend on a paid cus
 7. Run [`supabase/migrations/202610100002_enforce_member_rls.sql`](../supabase/migrations/202610100002_enforce_member_rls.sql). It refuses to change access policies unless exactly two members are enrolled. Run this immediately after verifying the new app so the older anonymous client is not locked out before deployment.
 8. Reload both signed-in devices and confirm shared data and Realtime updates still work.
 
+After authentication is working, follow [NOTIFICATIONS_SETUP.md](NOTIFICATIONS_SETUP.md) to add the optional free Web Push and errand-reminder layer.
+
 The Rin/Julius picker is still not authentication. It sets the character used inside the app and can be changed in Settings. Supabase Auth and `app_members` form the actual access boundary.
 
 The publishable key belongs in client code; a secret or service-role key never does.

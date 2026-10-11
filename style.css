@@ -894,6 +894,128 @@ p {
     gap: 8px;
 }
 
+.preference-list {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--border);
+}
+
+.preference-row {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.preference-row > span {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.preference-row strong {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.preference-row small {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.preference-row input[type="checkbox"] {
+    width: 44px;
+    min-width: 44px;
+    height: 26px;
+    min-height: 26px;
+    appearance: none;
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-subtle);
+    cursor: pointer;
+}
+
+.preference-row input[type="checkbox"]::before {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 1px 3px var(--shadow);
+    transition: transform 180ms ease;
+}
+
+.preference-row input[type="checkbox"]:checked {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.preference-row input[type="checkbox"]:checked::before {
+    transform: translateX(18px);
+}
+
+.compact-preference {
+    margin-top: 12px;
+    padding: 0 2px;
+}
+
+.notification-toast {
+    position: fixed;
+    z-index: 30;
+    top: max(16px, env(safe-area-inset-top));
+    left: 50%;
+    width: min(calc(100% - 32px), 480px);
+    min-height: 60px;
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 8px 24px var(--shadow);
+    transform: translateX(-50%);
+}
+
+.notification-toast[hidden] {
+    display: none;
+}
+
+.notification-toast > svg {
+    width: 20px;
+    height: 20px;
+    color: var(--accent);
+    stroke-width: 1.75;
+}
+
+.notification-toast > span {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.notification-toast strong {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.notification-toast small {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .preference-row input[type="checkbox"]::before {
+        transition: none;
+    }
+}
+
 .pet-options {
     display: grid;
     grid-template-columns: 1fr 1fr;
