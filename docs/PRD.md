@@ -4,7 +4,7 @@
 
 **Audience:** The two MaBestie users and contributors
 
-**Last updated:** October 10, 2026
+**Last updated:** October 11, 2026
 
 ## 1. Product summary
 
@@ -71,9 +71,11 @@ Requirements:
 - Allow filtering by one category at a time.
 - Show the number of visible items after filtering.
 - Open an item detail view when an item is selected.
-- Allow both users to add, edit, and delete an item.
-- Store a title, category, description, creator, and creation date for each item.
-- Preserve room for later optional fields such as links, estimated cost, location, and completion state.
+- Allow either user to mark any item complete or put it back on The List.
+- Hide completed items from the default and category views and retain them under a **Completed** filter.
+- Allow only the authenticated account that created an item to edit its content or delete it. Enforce this in Supabase as well as the interface.
+- Store a title, category, description, creator, creation date, completion state, completion date, completing profile, and completing account for each item so future statistics can distinguish movies watched, places visited, food tried, and wishlist items bought.
+- Preserve room for later optional fields such as links, estimated cost, and location.
 
 ### 4.2 Japan Procedures
 
@@ -216,7 +218,7 @@ Supabase is the shared source of truth across both users' devices. Browser `loca
 V2 uses these tables:
 
 - `profiles`: the two fixed profile names, theme preference, and latest status fields
-- `list_items`: categorized items for The List, including creator and timestamps
+- `list_items`: categorized items for The List, including account ownership and completion metadata
 - `procedure_lists`: active or archived Japan list metadata and archive date
 - `procedure_progress`: completion state and completing profile for each task
 - `errands`: category, assignment, scheduling, notes, completion metadata, and timestamps
@@ -247,6 +249,8 @@ Authentication identity and character identity intentionally remain separate. A 
 
 - Home labels the shared collection **The List**.
 - The List can be filtered by all four categories.
+- Either user can complete an item, and completed items appear in a dated completion history.
+- Only the authenticated creator account can edit or delete a List item.
 - List items open into an editable detail view.
 - Archiving a completed Japan list removes Japan from the footer.
 - Settings exposes the archived list and can restore it.

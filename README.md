@@ -11,7 +11,7 @@ MaBestie is a personal, mobile-friendly web app built for its two users and cont
 - Remembered Rin or Julius profile selection
 - Email-and-password access restricted to two approved Supabase users
 - Independent Mono and Lilac profile themes
-- Categorized and filterable **The List** with item details and editing
+- Categorized **The List** with completion history and creator-only editing
 - Japan procedure checklist with prerequisite locking, progress, archiving, and restoring
 - Survival Guide with Japan emergency numbers and Maebashi garbage sorting links
 - Shared errand planning with assignments, due dates, and recurrence
@@ -54,6 +54,8 @@ The original Date Ideas entries used a separate `date_ideas` table. See the [leg
 When connected:
 
 - One user's changes are stored in Supabase and appear on the other user's open app through Realtime.
+- Either user can complete a List item; its creator account alone can edit or delete it.
+- Completed List items retain who completed them and when for future statistics.
 - Empty cloud collections are initialized once from the first device's local cache.
 - Archiving changes the shared Japan list state; it does not delete its checklist progress.
 - A failed write remains in the local cache and is labeled **Changes pending**.

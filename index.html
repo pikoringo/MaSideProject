@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/MabestieApp.png" type="image/png">
     <link rel="apple-touch-icon" href="images/MabestieApp.png">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <title>MaBestie</title>
 </head>
 <body>
@@ -102,6 +102,7 @@
                 <section class="screen" id="list-screen" data-screen="list" hidden>
                     <div class="filter-row" id="list-filters" role="group" aria-label="Filter The List">
                         <button class="filter-chip" type="button" data-list-filter="all" aria-pressed="true">All</button>
+                        <button class="filter-chip" type="button" data-list-filter="completed" aria-pressed="false"><i data-lucide="check" aria-hidden="true"></i>Completed</button>
                         <button class="filter-chip" type="button" data-list-filter="movies" aria-pressed="false"><i data-lucide="clapperboard" aria-hidden="true"></i>Movies</button>
                         <button class="filter-chip" type="button" data-list-filter="places" aria-pressed="false"><i data-lucide="map-pin" aria-hidden="true"></i>Places</button>
                         <button class="filter-chip" type="button" data-list-filter="food" aria-pressed="false"><i data-lucide="utensils" aria-hidden="true"></i>Food</button>
@@ -114,8 +115,8 @@
                     <div class="item-list" id="list-items"></div>
                     <div class="empty-state" id="list-empty" hidden>
                         <i data-lucide="list" aria-hidden="true"></i>
-                        <h2>Nothing here yet</h2>
-                        <p>Add something you want to watch, visit, eat, or buy together.</p>
+                        <h2 id="list-empty-title">Nothing here yet</h2>
+                        <p id="list-empty-copy">Add something you want to watch, visit, eat, or buy together.</p>
                     </div>
                     <button class="primary-button block-button" id="add-list-item-button" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add to The List</button>
                 </section>
@@ -270,7 +271,8 @@
             <input id="list-item-title" type="text" maxlength="100" required>
             <label class="field-label" for="list-item-description">Description</label>
             <textarea id="list-item-description" rows="4" maxlength="500" placeholder="Add the details you want to remember."></textarea>
-            <div class="dialog-actions"><button class="danger-button" id="delete-list-item-button" type="button"><i data-lucide="trash-2" aria-hidden="true"></i>Delete</button><button class="primary-button" type="submit"><i data-lucide="check" aria-hidden="true"></i>Save</button></div>
+            <p class="ownership-note" id="list-item-owner-note" hidden></p>
+            <div class="dialog-actions" id="list-item-actions"><button class="danger-button" id="delete-list-item-button" type="button"><i data-lucide="trash-2" aria-hidden="true"></i>Delete</button><button class="primary-button" type="submit"><i data-lucide="check" aria-hidden="true"></i>Save</button></div>
         </form>
     </dialog>
 
@@ -337,6 +339,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/dist/umd/supabase.min.js"></script>
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
 </body>
 </html>

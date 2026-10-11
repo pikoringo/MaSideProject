@@ -595,7 +595,8 @@ p {
     white-space: nowrap;
 }
 
-.errand-check {
+.errand-check,
+.list-check {
     width: 28px;
     height: 28px;
     display: grid;
@@ -607,7 +608,8 @@ p {
     color: var(--accent);
 }
 
-.errand-copy-button {
+.errand-copy-button,
+.list-copy-button {
     min-width: 0;
     padding: 0;
     border: 0;
@@ -620,8 +622,20 @@ p {
     opacity: 0.58;
 }
 
-.errand-item.is-complete .item-copy strong {
+.errand-item.is-complete .item-copy strong,
+.list-item.is-complete .item-copy strong {
     text-decoration: line-through;
+}
+
+.list-item.is-complete {
+    opacity: 0.7;
+}
+
+.ownership-note {
+    margin: 12px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.45;
 }
 
 .empty-state {
