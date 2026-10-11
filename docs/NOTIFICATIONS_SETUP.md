@@ -1,6 +1,6 @@
 # Notification setup
 
-MaBestie uses standards-based Web Push, Supabase Edge Functions, and Supabase Cron. It does not require an Apple Developer membership or a paid notification provider. In-app notifications continue to work if system notifications are unavailable.
+MaBestie uses standards-based Web Push, Supabase Edge Functions, and Supabase Cron. It does not require an Apple Developer membership or a paid notification provider. In-app notifications continue to work if system notifications are unavailable. Status-change notifications are on by default; scheduled errand reminders are opt-in per account.
 
 The expected two-person traffic is far below the Supabase Free plan's current Edge Function and Realtime quotas. As with the rest of MaBestie, a Free project may pause after a week without activity.
 
@@ -33,7 +33,7 @@ The function exposes authenticated actions for configuration and immediate partn
 
 ## Schedule due reminders
 
-Enable the Supabase Cron and `pg_net` modules. Store the function URL and Cron secret in Supabase Vault, then schedule one request at 09:00 Japan time, which is 00:00 UTC while Japan remains UTC+9:
+Enable the Supabase Cron and `pg_net` modules. Store the function URL and Cron secret in Supabase Vault, then schedule one preference-aware check at 09:00 Japan time, which is 00:00 UTC while Japan remains UTC+9. The check sends nothing to an account unless that user has enabled the corresponding reminder in Settings:
 
 ```sql
 select vault.create_secret(

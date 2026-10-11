@@ -21,8 +21,8 @@ create table if not exists public.notification_preferences (
     status_updates boolean not null default true,
     urgent_errands boolean not null default true,
     assigned_errands boolean not null default true,
-    due_reminders boolean not null default true,
-    recurring_reminders boolean not null default true,
+    due_reminders boolean not null default false,
+    recurring_reminders boolean not null default false,
     errand_completed boolean not null default false,
     list_additions boolean not null default false,
     updated_at timestamptz not null default now()

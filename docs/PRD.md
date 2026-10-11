@@ -171,8 +171,8 @@ Default preferences:
 - Partner status updates: on
 - Urgent errands: on
 - New errands assigned to the recipient or both users: on
-- Errands due today: on
-- Recurring errands due again: on
+- Errands due today: off
+- Recurring errands due again: off
 - Errand completion: off
 - New additions to The List: off
 
@@ -180,6 +180,7 @@ Requirements:
 
 - Request system notification permission only after the user taps **Enable notifications**.
 - Keep a master device subscription control plus separate synchronized preference switches in Settings.
+- Treat partner status changes as the primary default notification. Scheduled errand reminders are opt-in per account.
 - Never notify the account that performed the action.
 - Do not notify for theme, pet, notes-only, or other nonessential edits.
 - Avoid duplicate notifications for the same account, event, and occurrence.

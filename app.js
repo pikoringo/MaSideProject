@@ -53,8 +53,8 @@ const DEFAULT_NOTIFICATION_PREFERENCES = {
     statusUpdates: true,
     urgentErrands: true,
     assignedErrands: true,
-    dueReminders: true,
-    recurringReminders: true,
+    dueReminders: false,
+    recurringReminders: false,
     errandCompleted: false,
     listAdditions: false
 };
@@ -386,8 +386,8 @@ function fromNotificationPreferences(row) {
         statusUpdates: row?.status_updates ?? true,
         urgentErrands: row?.urgent_errands ?? true,
         assignedErrands: row?.assigned_errands ?? true,
-        dueReminders: row?.due_reminders ?? true,
-        recurringReminders: row?.recurring_reminders ?? true,
+        dueReminders: row?.due_reminders ?? false,
+        recurringReminders: row?.recurring_reminders ?? false,
         errandCompleted: row?.errand_completed ?? false,
         listAdditions: row?.list_additions ?? false
     };
