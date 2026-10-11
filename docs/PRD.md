@@ -108,7 +108,7 @@ Each errand should support:
 - Open or completed state
 - Creator and completion metadata
 
-The default view shows open errands first, with compact summaries for open, due-today, and recurring items. Completed errands can be hidden from the default view without being deleted.
+The default view shows open errands first, with compact summaries for open, due-today, and recurring items. A completed errand remains in the default and category views for 24 hours, then hides automatically without being deleted. The **Completed** filter keeps the full completion history available for review, editing, reopening, or manual deletion.
 
 Recurring errands require a due date. Completing one preserves the completed occurrence and creates the next weekly or monthly occurrence with an advanced due date.
 

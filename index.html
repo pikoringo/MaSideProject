@@ -172,6 +172,7 @@
                     </div>
                     <div class="filter-row" id="errand-filters" role="group" aria-label="Filter errands">
                         <button class="filter-chip" type="button" data-errand-filter="all" aria-pressed="true">All</button>
+                        <button class="filter-chip" type="button" data-errand-filter="completed" aria-pressed="false">Completed</button>
                         <button class="filter-chip" type="button" data-errand-filter="groceries" aria-pressed="false">Groceries</button>
                         <button class="filter-chip" type="button" data-errand-filter="pickup" aria-pressed="false">Pickup</button>
                         <button class="filter-chip" type="button" data-errand-filter="home" aria-pressed="false">Home</button>
@@ -180,8 +181,8 @@
                     <div class="item-list" id="errand-items"></div>
                     <div class="empty-state" id="errands-empty" hidden>
                         <i data-lucide="shopping-basket" aria-hidden="true"></i>
-                        <h2>No open errands</h2>
-                        <p>You are all caught up.</p>
+                        <h2 id="errands-empty-title">No open errands</h2>
+                        <p id="errands-empty-copy">You are all caught up.</p>
                     </div>
                     <button class="primary-button block-button" id="add-errand-button" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add an errand</button>
                 </section>

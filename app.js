@@ -59,6 +59,8 @@ const DEFAULT_NOTIFICATION_PREFERENCES = {
     listAdditions: false
 };
 
+const COMPLETED_ERRAND_VISIBLE_MS = 24 * 60 * 60 * 1000;
+
 const LIST_CATEGORY_META = {
     movies: { label: "Movies", icon: "clapperboard" },
     places: { label: "Places to go", icon: "map-pin" },
@@ -288,6 +290,7 @@ let state = loadState();
 let currentScreen = "home";
 let listFilter = "all";
 let errandFilter = "all";
+let errandExpiryTimer = null;
 let selectedStatus = "";
 let selectedPetState = "idle";
 let cloudRefreshTimer = null;
@@ -973,11 +976,22 @@ function restoreProcedures() {
 }
 
 function renderErrands() {
+    clearTimeout(errandExpiryTimer);
+    errandExpiryTimer = null;
     const container = document.getElementById("errand-items");
     container.replaceChildren();
     const openErrands = state.errands.filter((errand) => !errand.completed);
-    const visible = state.errands.filter((errand) => errandFilter === "all" || errand.category === errandFilter);
-    visible.sort((a, b) => Number(a.completed) - Number(b.completed));
+    const visible = state.errands.filter((errand) => {
+        if (errandFilter === "completed") return errand.completed;
+        const matchesCategory = errandFilter === "all" || errand.category === errandFilter;
+        return matchesCategory && (!errand.completed || isRecentlyCompleted(errand));
+    });
+    visible.sort((a, b) => {
+        if (errandFilter === "completed") {
+            return new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime();
+        }
+        return Number(a.completed) - Number(b.completed);
+    });
 
     visible.forEach((errand) => {
         const meta = ERRAND_CATEGORY_META[errand.category] || ERRAND_CATEGORY_META.admin;
@@ -1046,10 +1060,29 @@ function renderErrands() {
     document.getElementById("errands-due-count").textContent = String(openErrands.filter((errand) => errand.dueDate === today()).length);
     document.getElementById("errands-recurring-count").textContent = String(openErrands.filter((errand) => errand.recurrence).length);
     document.getElementById("errands-empty").hidden = visible.length !== 0;
+    document.getElementById("errands-empty-title").textContent = errandFilter === "completed" ? "No completed errands" : "No open errands";
+    document.getElementById("errands-empty-copy").textContent = errandFilter === "completed"
+        ? "Completed errands will stay here."
+        : "You are all caught up.";
     document.querySelectorAll("[data-errand-filter]").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.errandFilter === errandFilter));
     });
+
+    const nextExpiryDelay = state.errands
+        .filter((errand) => isRecentlyCompleted(errand))
+        .map((errand) => new Date(errand.completedAt).getTime() + COMPLETED_ERRAND_VISIBLE_MS - Date.now())
+        .filter((delay) => delay > 0)
+        .sort((a, b) => a - b)[0];
+    if (nextExpiryDelay) {
+        errandExpiryTimer = setTimeout(renderErrands, nextExpiryDelay + 50);
+    }
     refreshIcons();
+}
+
+function isRecentlyCompleted(errand) {
+    if (!errand.completed || !errand.completedAt) return false;
+    const completedTime = new Date(errand.completedAt).getTime();
+    return Number.isFinite(completedTime) && Date.now() - completedTime < COMPLETED_ERRAND_VISIBLE_MS;
 }
 
 function formatErrandDetail(errand, categoryLabel) {
