@@ -47,10 +47,13 @@ The normal sign-in flow does not send email, so it does not depend on a paid cus
 6. Publish the authentication-capable app and confirm both accounts can sign in. The Rin/Julius character picker should appear after account sign-in.
 7. Run [`supabase/migrations/202610100002_enforce_member_rls.sql`](../supabase/migrations/202610100002_enforce_member_rls.sql). It refuses to change access policies unless exactly two members are enrolled. Run this immediately after verifying the new app so the older anonymous client is not locked out before deployment.
 8. Reload both signed-in devices and confirm shared data and Realtime updates still work.
+9. Run [`supabase/migrations/202610110002_list_completion_ownership.sql`](../supabase/migrations/202610110002_list_completion_ownership.sql) to add List completion history and creator-only edit/delete policies. It recovers older item ownership only when existing account metadata identifies one unambiguous owner for the creator profile.
 
 After authentication is working, follow [NOTIFICATIONS_SETUP.md](NOTIFICATIONS_SETUP.md) to add the optional free Web Push and errand-reminder layer.
 
 The Rin/Julius picker is still not authentication. It sets the character used inside the app and can be changed in Settings. Supabase Auth and `app_members` form the actual access boundary.
+
+List ownership follows the authenticated account, not the currently selected Rin/Julius character. Either account may complete or reopen an item through the restricted completion function, while only its creator account can edit the item content or delete it.
 
 The publishable key belongs in client code; a secret or service-role key never does.
 

@@ -62,10 +62,10 @@ const DEFAULT_NOTIFICATION_PREFERENCES = {
 const COMPLETED_ERRAND_VISIBLE_MS = 24 * 60 * 60 * 1000;
 
 const LIST_CATEGORY_META = {
-    movies: { label: "Movies", icon: "clapperboard" },
-    places: { label: "Places to go", icon: "map-pin" },
-    food: { label: "Food to eat", icon: "utensils" },
-    wishlist: { label: "Wishlist", icon: "gift" }
+    movies: { label: "Movies", icon: "clapperboard", completedLabel: "Watched" },
+    places: { label: "Places to go", icon: "map-pin", completedLabel: "Visited" },
+    food: { label: "Food to eat", icon: "utensils", completedLabel: "Tried" },
+    wishlist: { label: "Wishlist", icon: "gift", completedLabel: "Bought" }
 };
 
 const ERRAND_CATEGORY_META = {
@@ -208,6 +208,10 @@ function createSeedItem(title, category, description, createdBy) {
         category,
         description,
         createdBy,
+        completed: false,
+        completedBy: null,
+        completedByUserId: null,
+        completedAt: null,
         createdAt: new Date().toISOString()
     };
 }
@@ -289,6 +293,7 @@ function loadState() {
 let state = loadState();
 let currentScreen = "home";
 let listFilter = "all";
+let listDialogMode = "view";
 let errandFilter = "all";
 let errandExpiryTimer = null;
 let selectedStatus = "";
@@ -324,6 +329,10 @@ function fromListRow(row) {
         title: row.title,
         category: row.category,
         description: row.description || "",
+        completed: Boolean(row.completed),
+        completedBy: row.completed_by || null,
+        completedByUserId: row.completed_by_user_id || null,
+        completedAt: row.completed_at || null,
         createdBy: row.created_by,
         createdAt: row.created_at,
         createdByUserId: row.created_by_user_id || null,
@@ -337,9 +346,21 @@ function toListRow(item) {
         title: item.title,
         category: item.category,
         description: item.description || "",
+        completed: Boolean(item.completed),
+        completed_by: item.completed ? (item.completedBy || state.currentUser) : null,
+        completed_by_user_id: item.completed ? (item.completedByUserId || authSession?.user?.id || null) : null,
+        completed_at: item.completed ? (item.completedAt || new Date().toISOString()) : null,
         created_by: item.createdBy || state.currentUser,
         created_at: item.createdAt || new Date().toISOString(),
         created_by_user_id: item.createdByUserId || authSession?.user?.id || null
+    };
+}
+
+function toListEditableRow(item) {
+    return {
+        title: item.title,
+        category: item.category,
+        description: item.description || ""
     };
 }
 
@@ -739,7 +760,8 @@ function renderHome() {
 
     const openErrands = state.errands.filter((errand) => !errand.completed).length;
     const completedProcedures = completedProcedureCount();
-    document.getElementById("home-list-count").textContent = `${state.listItems.length} saved ${state.listItems.length === 1 ? "thing" : "things"}`;
+    const openListItems = state.listItems.filter((item) => !item.completed).length;
+    document.getElementById("home-list-count").textContent = `${openListItems} still on the list`;
     document.getElementById("home-errand-count").textContent = `${openErrands} open`;
     document.getElementById("home-procedure-count").textContent = `${completedProcedures} of ${PROCEDURES.length} complete`;
     document.getElementById("home-procedures-card").hidden = state.proceduresArchived;
@@ -759,34 +781,58 @@ function formatRelativeTime(isoString) {
 function renderList() {
     const container = document.getElementById("list-items");
     container.replaceChildren();
-    const visible = state.listItems.filter((item) => listFilter === "all" || item.category === listFilter);
+    const visible = state.listItems.filter((item) => {
+        if (listFilter === "completed") return item.completed;
+        const matchesCategory = listFilter === "all" || item.category === listFilter;
+        return matchesCategory && !item.completed;
+    });
+    if (listFilter === "completed") {
+        visible.sort((a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime());
+    }
 
     visible.forEach((item) => {
         const meta = LIST_CATEGORY_META[item.category] || LIST_CATEGORY_META.places;
-        const button = document.createElement("button");
-        button.className = "list-item";
-        button.type = "button";
-        button.addEventListener("click", () => openListDialog(item.id));
+        const row = document.createElement("div");
+        row.className = "list-item";
+        row.classList.toggle("is-complete", item.completed);
 
-        const leading = document.createElement("span");
-        leading.className = "item-leading";
-        leading.appendChild(icon(meta.icon));
+        const check = document.createElement("button");
+        check.className = "list-check";
+        check.type = "button";
+        check.setAttribute("aria-label", `${item.completed ? "Put back on The List" : "Mark complete"}: ${item.title}`);
+        if (item.completed) check.appendChild(icon("check"));
+        check.addEventListener("click", () => toggleListItemCompletion(item.id));
 
-        const copy = document.createElement("span");
-        copy.className = "item-copy";
+        const copy = document.createElement("button");
+        copy.className = "item-copy list-copy-button";
+        copy.type = "button";
         const title = document.createElement("strong");
         title.textContent = item.title;
         const detail = document.createElement("small");
-        detail.textContent = `${meta.label} · ${item.createdBy || "Shared"}`;
+        detail.textContent = item.completed
+            ? `${meta.completedLabel} by ${item.completedBy || "Shared"}${item.completedAt ? ` · ${formatListCompletionDate(item.completedAt)}` : ""}`
+            : `${meta.label} · Added by ${item.createdBy || "Shared"}`;
         copy.append(title, detail);
+        copy.addEventListener("click", () => openListDialog(item.id));
 
-        button.append(leading, copy, icon("chevron-right"));
-        container.appendChild(button);
+        const trailing = document.createElement("span");
+        trailing.className = "item-leading";
+        trailing.appendChild(icon(meta.icon));
+        trailing.setAttribute("aria-label", meta.label);
+
+        row.append(check, copy, trailing);
+        container.appendChild(row);
     });
 
     document.getElementById("list-visible-count").textContent = `${visible.length} ${visible.length === 1 ? "item" : "items"}`;
-    document.getElementById("list-section-title").textContent = listFilter === "all" ? "Everything" : LIST_CATEGORY_META[listFilter].label;
+    document.getElementById("list-section-title").textContent = listFilter === "all"
+        ? "Still to do"
+        : listFilter === "completed" ? "Completed" : LIST_CATEGORY_META[listFilter].label;
     document.getElementById("list-empty").hidden = visible.length !== 0;
+    document.getElementById("list-empty-title").textContent = listFilter === "completed" ? "Nothing completed yet" : "Nothing here yet";
+    document.getElementById("list-empty-copy").textContent = listFilter === "completed"
+        ? "Finished movies, visits, meals, and purchases will stay here."
+        : "Add something you want to watch, visit, eat, or buy together.";
 
     document.querySelectorAll("[data-list-filter]").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.listFilter === listFilter));
@@ -794,24 +840,97 @@ function renderList() {
     refreshIcons();
 }
 
+function formatListCompletionDate(isoString) {
+    const date = new Date(isoString);
+    if (!Number.isFinite(date.getTime())) return "";
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+}
+
+function isListItemOwner(item) {
+    return Boolean(item?.createdByUserId && authSession?.user?.id && item.createdByUserId === authSession.user.id);
+}
+
+async function toggleListItemCompletion(id) {
+    const item = state.listItems.find((candidate) => candidate.id === id);
+    if (!item) return;
+    const previous = {
+        completed: item.completed,
+        completedBy: item.completedBy,
+        completedByUserId: item.completedByUserId,
+        completedAt: item.completedAt
+    };
+    item.completed = !item.completed;
+    item.completedBy = item.completed ? state.currentUser : null;
+    item.completedByUserId = item.completed ? (authSession?.user?.id || null) : null;
+    item.completedAt = item.completed ? new Date().toISOString() : null;
+    saveState();
+    renderAll();
+
+    if (!cloud) return;
+    const saved = await writeToCloud(cloud.rpc("set_list_item_completion", {
+        p_item_id: item.id,
+        p_completed: item.completed,
+        p_completed_by: item.completed ? state.currentUser : null
+    }));
+    if (!saved) {
+        Object.assign(item, previous);
+        saveState();
+        renderAll();
+    }
+}
+
 function openListDialog(id = "") {
     const item = state.listItems.find((candidate) => candidate.id === id);
+    const isNew = !item;
+    const canEdit = item && isListItemOwner(item);
+    const category = LIST_CATEGORY_META[listFilter] ? listFilter : "movies";
+    listDialogMode = isNew ? "add" : "view";
     document.getElementById("list-item-id").value = item?.id || "";
-    document.getElementById("list-item-category").value = item?.category || "places";
+    document.getElementById("list-item-category").value = item?.category || category;
     document.getElementById("list-item-title").value = item?.title || "";
     document.getElementById("list-item-description").value = item?.description || "";
-    document.getElementById("list-dialog-title").textContent = item ? "Edit item" : "Add an item";
-    document.getElementById("delete-list-item-button").hidden = !item;
+    document.getElementById("list-dialog-title").textContent = item?.title || "Add an item";
+    document.getElementById("list-item-detail").hidden = isNew;
+    document.getElementById("list-item-fields").hidden = !isNew;
+    document.getElementById("list-item-actions").hidden = !isNew;
+    document.getElementById("delete-list-item-button").hidden = isNew;
+    if (item) {
+        const meta = LIST_CATEGORY_META[item.category] || LIST_CATEGORY_META.places;
+        document.getElementById("list-detail-category").textContent = meta.label;
+        document.getElementById("list-detail-description").textContent = item.description || "No description yet.";
+        const completedDate = item.completedAt ? formatListCompletionDate(item.completedAt) : "";
+        const ownershipNote = item.createdByUserId
+            ? `Added by ${item.createdBy || "your partner"}.${canEdit ? " Tap Edit to change or delete it." : ""}`
+            : "Added before account ownership was recorded. This item is view-only, but either person can mark it complete.";
+        document.getElementById("list-item-owner-note").textContent = item.completed
+            ? `${meta.completedLabel} by ${item.completedBy || "your partner"}${completedDate ? ` on ${completedDate}` : ""}. ${ownershipNote}`
+            : ownershipNote;
+        document.getElementById("list-detail-actions").hidden = !canEdit;
+    }
     document.getElementById("list-item-dialog").showModal();
+    if (isNew) document.getElementById("list-item-title").focus();
+}
+
+function editListItem() {
+    const id = document.getElementById("list-item-id").value;
+    const item = state.listItems.find((candidate) => candidate.id === id);
+    if (!isListItemOwner(item)) return;
+    listDialogMode = "edit";
+    document.getElementById("list-dialog-title").textContent = "Edit item";
+    document.getElementById("list-item-detail").hidden = true;
+    document.getElementById("list-item-fields").hidden = false;
+    document.getElementById("list-item-actions").hidden = false;
     document.getElementById("list-item-title").focus();
 }
 
 function saveListItem() {
+    if (listDialogMode !== "add" && listDialogMode !== "edit") return;
     const id = document.getElementById("list-item-id").value;
     const title = document.getElementById("list-item-title").value.trim();
     if (!title) return;
 
     const existing = state.listItems.find((item) => item.id === id);
+    if (existing && !isListItemOwner(existing)) return;
     const isNew = !existing;
     const values = {
         title,
@@ -838,7 +957,10 @@ function saveListItem() {
     document.getElementById("list-item-dialog").close();
     renderAll();
     if (cloud) {
-        writeToCloud(cloud.from("list_items").upsert(toListRow(savedItem))).then((saved) => {
+        const operation = isNew
+            ? cloud.from("list_items").insert(toListRow(savedItem))
+            : cloud.from("list_items").update(toListEditableRow(savedItem)).eq("id", savedItem.id);
+        writeToCloud(operation).then((saved) => {
             if (saved && isNew) requestPartnerNotification("list_added", savedItem.id);
         });
     }
@@ -846,6 +968,8 @@ function saveListItem() {
 
 function deleteListItem() {
     const id = document.getElementById("list-item-id").value;
+    const item = state.listItems.find((candidate) => candidate.id === id);
+    if (!isListItemOwner(item)) return;
     state.listItems = state.listItems.filter((item) => item.id !== id);
     saveState();
     document.getElementById("list-item-dialog").close();
@@ -1451,6 +1575,7 @@ document.querySelectorAll("[data-pet-state]").forEach((button) => {
 });
 
 document.getElementById("add-list-item-button").addEventListener("click", () => openListDialog());
+document.getElementById("edit-list-item-button").addEventListener("click", editListItem);
 document.getElementById("list-item-form").addEventListener("submit", (event) => {
     event.preventDefault();
     saveListItem();
