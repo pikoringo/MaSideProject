@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/MabestieApp.png" type="image/png">
     <link rel="apple-touch-icon" href="images/MabestieApp.png">
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
     <title>MaBestie</title>
 </head>
 <body>
@@ -102,15 +102,14 @@
                 <section class="screen" id="list-screen" data-screen="list" hidden>
                     <div class="filter-row" id="list-filters" role="group" aria-label="Filter The List">
                         <button class="filter-chip" type="button" data-list-filter="all" aria-pressed="true">All</button>
-                        <button class="filter-chip" type="button" data-list-filter="completed" aria-pressed="false"><i data-lucide="check" aria-hidden="true"></i>Completed</button>
                         <button class="filter-chip" type="button" data-list-filter="movies" aria-pressed="false"><i data-lucide="clapperboard" aria-hidden="true"></i>Movies</button>
                         <button class="filter-chip" type="button" data-list-filter="places" aria-pressed="false"><i data-lucide="map-pin" aria-hidden="true"></i>Places</button>
                         <button class="filter-chip" type="button" data-list-filter="food" aria-pressed="false"><i data-lucide="utensils" aria-hidden="true"></i>Food</button>
                         <button class="filter-chip" type="button" data-list-filter="wishlist" aria-pressed="false"><i data-lucide="gift" aria-hidden="true"></i>Wishlist</button>
                     </div>
-                    <div class="section-heading">
-                        <h2 id="list-section-title">Everything</h2>
-                        <span id="list-visible-count">0 items</span>
+                    <div class="section-heading list-section-heading">
+                        <div><h2 id="list-section-title">Still to do</h2><span id="list-visible-count">0 items</span></div>
+                        <button class="list-completed-link" id="list-completed-filter" type="button" aria-pressed="false"><i data-lucide="check" aria-hidden="true"></i>Completed <span id="list-completed-count">(0)</span></button>
                     </div>
                     <div class="item-list" id="list-items"></div>
                     <div class="empty-state" id="list-empty" hidden>
@@ -118,7 +117,7 @@
                         <h2 id="list-empty-title">Nothing here yet</h2>
                         <p id="list-empty-copy">Add something you want to watch, visit, eat, or buy together.</p>
                     </div>
-                    <button class="primary-button block-button" id="add-list-item-button" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add to The List</button>
+                    <div class="list-add-dock"><button class="primary-button block-button" id="add-list-item-button" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add to The List</button></div>
                 </section>
 
                 <section class="screen" id="procedures-screen" data-screen="procedures" hidden>
@@ -343,9 +342,10 @@
     </dialog>
 
     <div class="notification-toast" id="notification-toast" role="status" aria-live="polite" hidden><i data-lucide="bell" aria-hidden="true"></i><span><strong id="notification-toast-title"></strong><small id="notification-toast-body"></small></span></div>
+    <div class="list-undo-toast" id="list-undo-toast" role="status" aria-live="polite" hidden><span id="list-undo-copy"></span><button id="list-undo-button" type="button">Undo</button></div>
 
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/dist/umd/supabase.min.js"></script>
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
 </body>
 </html>

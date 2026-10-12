@@ -4,7 +4,7 @@
 
 **Audience:** The two MaBestie users and contributors
 
-**Last updated:** October 11, 2026
+**Last updated:** October 12, 2026
 
 ## 1. Product summary
 
@@ -75,6 +75,9 @@ Requirements:
 - When adding from a category filter, preselect that category in the form.
 - Allow either user to mark any item complete or put it back on The List.
 - Hide completed items from the default and category views and retain them under a **Completed** filter.
+- Use compact divider-separated rows with a one-line description preview; keep **Completed** separate from the category chips and show its item count.
+- Keep **Add to The List** reachable while scrolling. After completing an item, offer a brief **Undo** action.
+- In the Completed view, show the item's category and a small **Cleared [date]** line without needing to show who cleared it. Keep completion identity in the data for future statistics.
 - Allow only the authenticated account that created an item to edit its content or delete it. Enforce this in Supabase as well as the interface.
 - Store a title, category, description, creator, creation date, completion state, completion date, completing profile, and completing account for each item so future statistics can distinguish movies watched, places visited, food tried, and wishlist items bought.
 - Preserve room for later optional fields such as links, estimated cost, and location.

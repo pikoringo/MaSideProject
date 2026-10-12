@@ -469,7 +469,7 @@ p {
 }
 
 .filter-chip {
-    min-height: 40px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -492,6 +492,64 @@ p {
     width: 18px;
     height: 18px;
     stroke-width: 1.75;
+}
+
+.list-section-heading {
+    align-items: flex-end;
+    margin-top: 20px;
+}
+
+.list-section-heading h2 {
+    margin: 0 0 4px;
+}
+
+.list-completed-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    padding: 0 0 0 8px;
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.list-completed-link svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.75;
+}
+
+.list-completed-link[aria-pressed="true"] {
+    color: var(--text);
+}
+
+#list-screen {
+    padding-bottom: 88px;
+}
+
+#list-items {
+    gap: 0;
+    border-top: 1px solid var(--border);
+}
+
+.list-add-dock {
+    position: fixed;
+    z-index: 4;
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    left: 50%;
+    width: min(100%, 620px);
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--background);
+    transform: translateX(-50%);
+}
+
+.list-add-dock .block-button {
+    margin-top: 0;
 }
 
 .item-list {
@@ -556,7 +614,26 @@ p {
 }
 
 .list-item {
-    grid-template-columns: 44px minmax(0, 1fr) 40px;
+    min-height: 76px;
+    grid-template-columns: 44px minmax(0, 1fr) 24px;
+    gap: 8px;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+}
+
+.list-row-icon {
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+}
+
+.list-row-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.75;
 }
 
 .item-leading {
@@ -634,6 +711,15 @@ p {
     grid-area: 1 / 1;
 }
 
+.list-check[aria-pressed="true"]::before {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.list-check[aria-pressed="true"] svg {
+    color: var(--accent-foreground);
+}
+
 .errand-copy-button,
 .list-copy-button {
     min-width: 0;
@@ -645,8 +731,16 @@ p {
 }
 
 .list-copy-button {
-    min-height: 44px;
+    min-height: 60px;
     align-content: center;
+}
+
+.list-copy-button .list-preview {
+    font-size: 13px;
+}
+
+.list-copy-button .list-meta {
+    font-size: 12px;
 }
 
 .errand-item.is-complete {
@@ -659,7 +753,36 @@ p {
 }
 
 .list-item.is-complete {
-    opacity: 0.7;
+    opacity: 1;
+}
+
+.list-undo-toast {
+    position: fixed;
+    z-index: 30;
+    bottom: calc(146px + env(safe-area-inset-bottom));
+    left: 50%;
+    width: min(calc(100% - 32px), 480px);
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 8px 24px var(--shadow);
+    transform: translateX(-50%);
+    font-size: 13px;
+}
+
+.list-undo-toast button {
+    min-height: 44px;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+    font-weight: 500;
 }
 
 .ownership-note {
@@ -1345,6 +1468,11 @@ textarea {
     .filter-row {
         margin-right: -14px;
         margin-left: -14px;
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .list-add-dock {
         padding-right: 14px;
         padding-left: 14px;
     }

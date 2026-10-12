@@ -2,7 +2,7 @@
 
 **Canonical direction:** Quiet Accent
 
-**Last updated:** October 10, 2026
+**Last updated:** October 12, 2026
 
 All UI work must follow this document. If a new component or icon is needed, extend this system deliberately instead of introducing a one-off style.
 
@@ -150,6 +150,9 @@ Rin's dark appearance uses:
 - Opening an existing item shows its title, category, description, and ownership/completion details as text.
 - Show the labeled **Edit** action only to its creator. Editable fields appear after that action; the title receives focus then.
 - An Add form may focus its title immediately and inherits the active category filter.
+- The List uses compact divider-separated rows, not individual cards. A row has a 44px completion target, title, one-line description preview, small category metadata, and one trailing category icon.
+- Keep **Completed** beside the section heading with its count; category chips stay together. Completed rows show small muted **Cleared [date]** metadata and keep the title legible.
+- Keep the labeled Add action above the footer while scrolling, with enough bottom space that it never hides the last row. A compact neutral **Undo** toast may appear after a completed item is saved.
 
 ### Filters
 
