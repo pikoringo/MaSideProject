@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="images/MabestieApp.png" type="image/png">
     <link rel="apple-touch-icon" href="images/MabestieApp.png">
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
     <title>MaBestie</title>
 </head>
 <body>
@@ -265,13 +265,20 @@
         <form method="dialog" id="list-item-form">
             <div class="dialog-header"><div><p class="eyebrow">The List</p><h2 id="list-dialog-title">Add an item</h2></div><button class="icon-button" type="button" data-close-dialog="list-item-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
             <input type="hidden" id="list-item-id">
-            <label class="field-label" for="list-item-category">Category</label>
-            <select id="list-item-category" required><option value="movies">Movies</option><option value="places">Places to go</option><option value="food">Food to eat</option><option value="wishlist">Wishlist</option></select>
-            <label class="field-label" for="list-item-title">Title</label>
-            <input id="list-item-title" type="text" maxlength="100" required>
-            <label class="field-label" for="list-item-description">Description</label>
-            <textarea id="list-item-description" rows="4" maxlength="500" placeholder="Add the details you want to remember."></textarea>
-            <p class="ownership-note" id="list-item-owner-note" hidden></p>
+            <div id="list-item-detail" hidden>
+                <p class="list-detail-category" id="list-detail-category"></p>
+                <p class="list-detail-description" id="list-detail-description"></p>
+                <p class="ownership-note" id="list-item-owner-note"></p>
+                <div class="dialog-actions" id="list-detail-actions"><button class="secondary-button" id="edit-list-item-button" type="button"><i data-lucide="pencil" aria-hidden="true"></i>Edit</button></div>
+            </div>
+            <div id="list-item-fields">
+                <label class="field-label" for="list-item-category">Category</label>
+                <select id="list-item-category" required><option value="movies">Movies</option><option value="places">Places to go</option><option value="food">Food to eat</option><option value="wishlist">Wishlist</option></select>
+                <label class="field-label" for="list-item-title">Title</label>
+                <input id="list-item-title" type="text" maxlength="100" required>
+                <label class="field-label" for="list-item-description">Description</label>
+                <textarea id="list-item-description" rows="4" maxlength="500" placeholder="Add the details you want to remember."></textarea>
+            </div>
             <div class="dialog-actions" id="list-item-actions"><button class="danger-button" id="delete-list-item-button" type="button"><i data-lucide="trash-2" aria-hidden="true"></i>Delete</button><button class="primary-button" type="submit"><i data-lucide="check" aria-hidden="true"></i>Save</button></div>
         </form>
     </dialog>
@@ -339,6 +346,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/dist/umd/supabase.min.js"></script>
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>

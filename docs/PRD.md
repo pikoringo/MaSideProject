@@ -71,6 +71,8 @@ Requirements:
 - Allow filtering by one category at a time.
 - Show the number of visible items after filtering.
 - Open an item detail view when an item is selected.
+- Open existing items in a read-only detail view; show editable fields and focus the title only after the creator taps **Edit**.
+- When adding from a category filter, preselect that category in the form.
 - Allow either user to mark any item complete or put it back on The List.
 - Hide completed items from the default and category views and retain them under a **Completed** filter.
 - Allow only the authenticated account that created an item to edit its content or delete it. Enforce this in Supabase as well as the interface.

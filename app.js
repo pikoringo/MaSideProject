@@ -293,6 +293,7 @@ function loadState() {
 let state = loadState();
 let currentScreen = "home";
 let listFilter = "all";
+let listDialogMode = "view";
 let errandFilter = "all";
 let errandExpiryTimer = null;
 let selectedStatus = "";
@@ -880,29 +881,50 @@ async function toggleListItemCompletion(id) {
 
 function openListDialog(id = "") {
     const item = state.listItems.find((candidate) => candidate.id === id);
-    const canEdit = !item || isListItemOwner(item);
+    const isNew = !item;
+    const canEdit = item && isListItemOwner(item);
+    const category = LIST_CATEGORY_META[listFilter] ? listFilter : "movies";
+    listDialogMode = isNew ? "add" : "view";
     document.getElementById("list-item-id").value = item?.id || "";
-    document.getElementById("list-item-category").value = item?.category || "places";
+    document.getElementById("list-item-category").value = item?.category || category;
     document.getElementById("list-item-title").value = item?.title || "";
     document.getElementById("list-item-description").value = item?.description || "";
-    document.getElementById("list-dialog-title").textContent = item ? (canEdit ? "Edit item" : "View item") : "Add an item";
-    document.getElementById("list-item-category").disabled = !canEdit;
-    document.getElementById("list-item-title").readOnly = !canEdit;
-    document.getElementById("list-item-description").readOnly = !canEdit;
-    document.getElementById("list-item-actions").hidden = !canEdit;
-    document.getElementById("delete-list-item-button").hidden = !item;
-    const ownerNote = document.getElementById("list-item-owner-note");
-    ownerNote.hidden = !item;
-    ownerNote.textContent = canEdit
-        ? `Added by ${item?.createdBy || "you"}. You can edit or delete this item.`
-        : item?.createdByUserId
-            ? `Added by ${item.createdBy || "your partner"}. Only the account that added it can edit or delete it.`
+    document.getElementById("list-dialog-title").textContent = item?.title || "Add an item";
+    document.getElementById("list-item-detail").hidden = isNew;
+    document.getElementById("list-item-fields").hidden = !isNew;
+    document.getElementById("list-item-actions").hidden = !isNew;
+    document.getElementById("delete-list-item-button").hidden = isNew;
+    if (item) {
+        const meta = LIST_CATEGORY_META[item.category] || LIST_CATEGORY_META.places;
+        document.getElementById("list-detail-category").textContent = meta.label;
+        document.getElementById("list-detail-description").textContent = item.description || "No description yet.";
+        const completedDate = item.completedAt ? formatListCompletionDate(item.completedAt) : "";
+        const ownershipNote = item.createdByUserId
+            ? `Added by ${item.createdBy || "your partner"}.${canEdit ? " Tap Edit to change or delete it." : ""}`
             : "Added before account ownership was recorded. This item is view-only, but either person can mark it complete.";
+        document.getElementById("list-item-owner-note").textContent = item.completed
+            ? `${meta.completedLabel} by ${item.completedBy || "your partner"}${completedDate ? ` on ${completedDate}` : ""}. ${ownershipNote}`
+            : ownershipNote;
+        document.getElementById("list-detail-actions").hidden = !canEdit;
+    }
     document.getElementById("list-item-dialog").showModal();
-    if (canEdit) document.getElementById("list-item-title").focus();
+    if (isNew) document.getElementById("list-item-title").focus();
+}
+
+function editListItem() {
+    const id = document.getElementById("list-item-id").value;
+    const item = state.listItems.find((candidate) => candidate.id === id);
+    if (!isListItemOwner(item)) return;
+    listDialogMode = "edit";
+    document.getElementById("list-dialog-title").textContent = "Edit item";
+    document.getElementById("list-item-detail").hidden = true;
+    document.getElementById("list-item-fields").hidden = false;
+    document.getElementById("list-item-actions").hidden = false;
+    document.getElementById("list-item-title").focus();
 }
 
 function saveListItem() {
+    if (listDialogMode !== "add" && listDialogMode !== "edit") return;
     const id = document.getElementById("list-item-id").value;
     const title = document.getElementById("list-item-title").value.trim();
     if (!title) return;
@@ -1553,6 +1575,7 @@ document.querySelectorAll("[data-pet-state]").forEach((button) => {
 });
 
 document.getElementById("add-list-item-button").addEventListener("click", () => openListDialog());
+document.getElementById("edit-list-item-button").addEventListener("click", editListItem);
 document.getElementById("list-item-form").addEventListener("submit", (event) => {
     event.preventDefault();
     saveListItem();

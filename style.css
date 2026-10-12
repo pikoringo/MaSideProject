@@ -555,6 +555,10 @@ p {
     text-align: left;
 }
 
+.list-item {
+    grid-template-columns: 44px minmax(0, 1fr) 40px;
+}
+
 .item-leading {
     width: 40px;
     height: 40px;
@@ -608,6 +612,28 @@ p {
     color: var(--accent);
 }
 
+.list-check {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+}
+
+.list-check::before {
+    width: 28px;
+    height: 28px;
+    grid-area: 1 / 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    content: "";
+}
+
+.list-check svg {
+    z-index: 1;
+    grid-area: 1 / 1;
+}
+
 .errand-copy-button,
 .list-copy-button {
     min-width: 0;
@@ -616,6 +642,11 @@ p {
     background: transparent;
     color: inherit;
     text-align: left;
+}
+
+.list-copy-button {
+    min-height: 44px;
+    align-content: center;
 }
 
 .errand-item.is-complete {
@@ -636,6 +667,19 @@ p {
     color: var(--text-muted);
     font-size: 12px;
     line-height: 1.45;
+}
+
+.list-detail-category {
+    margin: 0 0 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.list-detail-description {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 15px;
+    line-height: 1.5;
 }
 
 .empty-state {

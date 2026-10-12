@@ -145,6 +145,12 @@ Rin's dark appearance uses:
 - Each row has one leading icon, one text block, and at most one trailing status or action.
 - Reference screens may group important numbers in a neutral card and use linked rows for official resources. Keep the number, label, and destination visible in text.
 
+### List item details
+
+- Opening an existing item shows its title, category, description, and ownership/completion details as text.
+- Show the labeled **Edit** action only to its creator. Editable fields appear after that action; the title receives focus then.
+- An Add form may focus its title immediately and inherits the active category filter.
+
 ### Filters
 
 - Use horizontally scrollable labeled chips.
