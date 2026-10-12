@@ -307,6 +307,7 @@ let listUndoTimer = null;
 let listUndoItemId = null;
 const listCompletionPending = new Set();
 let serviceWorkerRegistration = null;
+let pushPublicKeyPromise = null;
 
 const appShell = document.getElementById("app-shell");
 const authGate = document.getElementById("auth-gate");
@@ -1349,6 +1350,22 @@ async function currentPushSubscription() {
     return registration ? registration.pushManager.getSubscription() : null;
 }
 
+function loadPushPublicKey() {
+    if (!pushPublicKeyPromise) {
+        pushPublicKeyPromise = cloud.functions.invoke("push-notifications", { body: { action: "config" } })
+            .then(({ data, error }) => {
+                if (error) throw error;
+                if (!data?.publicKey) throw new Error("Push configuration has no public key");
+                return data.publicKey;
+            })
+            .catch((error) => {
+                pushPublicKeyPromise = null;
+                throw error;
+            });
+    }
+    return pushPublicKeyPromise;
+}
+
 async function renderNotificationControls() {
     const copy = document.getElementById("notification-support-copy");
     const button = document.getElementById("notification-permission-button");
@@ -1372,6 +1389,7 @@ async function renderNotificationControls() {
         return;
     }
 
+    if (authSession) loadPushPublicKey().catch(() => {});
     const subscription = await currentPushSubscription();
     button.disabled = false;
     if (subscription) {
@@ -1395,16 +1413,23 @@ async function enableSystemNotifications() {
         return;
     }
 
-    const { data, error } = await cloud.functions.invoke("push-notifications", { body: { action: "config" } });
-    if (error || !data?.publicKey) {
-        copy.textContent = "Notification delivery still needs server setup. In-app alerts are active.";
+    let publicKey;
+    try {
+        publicKey = await loadPushPublicKey();
+    } catch (error) {
+        document.getElementById("notification-permission-button").disabled = false;
+        const status = error?.context?.status;
+        copy.textContent = status === 401 || status === 403
+            ? `Phone notification setup was rejected by the server (${status}). In-app alerts still work.`
+            : "Phone notification setup is unavailable right now. Please try again. In-app alerts still work.";
+        console.warn("Could not load push configuration.", error);
         return;
     }
 
     const registration = await registerNotificationServiceWorker();
     const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: decodeApplicationServerKey(data.publicKey)
+        applicationServerKey: decodeApplicationServerKey(publicKey)
     });
     const serialized = subscription.toJSON();
     const { error: saveError } = await cloud.from("push_subscriptions").upsert({

@@ -9,6 +9,7 @@ The expected two-person traffic is far below the Supabase Free plan's current Ed
 - Complete the two-person authentication setup first.
 - Apply [`202610100003_notifications.sql`](../supabase/migrations/202610100003_notifications.sql).
 - Deploy the `push-notifications` Edge Function with JWT verification disabled. The function validates user tokens itself and separately validates the Cron secret.
+- Leave Supabase's built-in `SUPABASE_PUBLISHABLE_KEYS` and `SUPABASE_SECRET_KEYS` available to the function. It uses their `default` keys, with the legacy anon and service-role keys only as a fallback.
 - Keep all generated private values in Supabase Edge Function secrets, never in this repository.
 
 ## Create Web Push secrets
@@ -67,6 +68,8 @@ select cron.schedule(
 5. Approve the iOS permission prompt.
 
 iOS and iPadOS require version 16.4 or newer for Home Screen Web Push. Notification preferences sync by account, while permission and the push subscription are stored per device.
+
+If Settings says phone notification setup was rejected, check the `push-notifications` invocation status and logs before changing the iPhone permission. A `401` means the function could not validate the session; a `403` means its member lookup found no matching account. A `503` means the member lookup or server configuration failed. The two approved users must exist in `app_members` with the same user IDs as Supabase Authentication. A successful enable action creates a row in `push_subscriptions`; iOS permission alone does not.
 
 ## Test matrix
 

@@ -33,6 +33,16 @@ function base64Url(bytes: Uint8Array) {
     return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
+function projectKey(name: string, legacyName: string) {
+    const namedKeys = Deno.env.get(name);
+    if (namedKeys) {
+        const key = JSON.parse(namedKeys).default;
+        if (typeof key !== "string" || !key) throw new Error(`${name} has no default key`);
+        return key;
+    }
+    return Deno.env.get(legacyName);
+}
+
 async function createApplicationServer() {
     const exportedKeys = JSON.parse(Deno.env.get("VAPID_KEYS") || "null");
     const contactInformation = Deno.env.get("VAPID_CONTACT");
@@ -125,10 +135,10 @@ export default {
         if (request.method !== "POST") return response({ error: "Method not allowed" }, 405);
 
         const supabaseUrl = Deno.env.get("SUPABASE_URL");
-        const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-        const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-        if (!supabaseUrl || !serviceRoleKey || !anonKey) return response({ error: "Server configuration is incomplete" }, 503);
-        const admin = createClient(supabaseUrl, serviceRoleKey);
+        const secretKey = projectKey("SUPABASE_SECRET_KEYS", "SUPABASE_SERVICE_ROLE_KEY");
+        const publishableKey = projectKey("SUPABASE_PUBLISHABLE_KEYS", "SUPABASE_ANON_KEY");
+        if (!supabaseUrl || !secretKey || !publishableKey) return response({ error: "Server configuration is incomplete" }, 503);
+        const admin = createClient(supabaseUrl, secretKey);
         const input = await request.json().catch(() => ({}));
 
         if (input.action === "send_due_reminders") {
@@ -139,10 +149,14 @@ export default {
         }
 
         const authorization = request.headers.get("Authorization") || "";
-        const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
+        const userClient = createClient(supabaseUrl, publishableKey, { global: { headers: { Authorization: authorization } } });
         const { data: { user }, error: userError } = await userClient.auth.getUser();
         if (userError || !user) return response({ error: "Unauthorized" }, 401);
-        const { data: membership } = await admin.from("app_members").select("user_id").eq("user_id", user.id).maybeSingle();
+        const { data: membership, error: membershipError } = await admin.from("app_members").select("user_id").eq("user_id", user.id).maybeSingle();
+        if (membershipError) {
+            console.error("Could not check MaBestie membership", membershipError);
+            return response({ error: "Membership check unavailable" }, 503);
+        }
         if (!membership) return response({ error: "Not a MaBestie member" }, 403);
 
         const server = await createApplicationServer();
