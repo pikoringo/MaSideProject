@@ -303,6 +303,9 @@ let cloudChannel = null;
 let petAnimationFrame = null;
 let authSession = null;
 let notificationToastTimer = null;
+let listUndoTimer = null;
+let listUndoItemId = null;
+const listCompletionPending = new Set();
 let serviceWorkerRegistration = null;
 
 const appShell = document.getElementById("app-shell");
@@ -673,6 +676,7 @@ function navigate(screen) {
     }
 
     currentScreen = screen;
+    hideListUndoToast();
     document.querySelectorAll("[data-screen]").forEach((section) => {
         section.hidden = section.dataset.screen !== screen;
     });
@@ -800,6 +804,8 @@ function renderList() {
         check.className = "list-check";
         check.type = "button";
         check.setAttribute("aria-label", `${item.completed ? "Put back on The List" : "Mark complete"}: ${item.title}`);
+        check.setAttribute("aria-pressed", String(Boolean(item.completed)));
+        check.disabled = listCompletionPending.has(item.id);
         if (item.completed) check.appendChild(icon("check"));
         check.addEventListener("click", () => toggleListItemCompletion(item.id));
 
@@ -808,15 +814,20 @@ function renderList() {
         copy.type = "button";
         const title = document.createElement("strong");
         title.textContent = item.title;
-        const detail = document.createElement("small");
-        detail.textContent = item.completed
-            ? `${meta.completedLabel} by ${item.completedBy || "Shared"}${item.completedAt ? ` · ${formatListCompletionDate(item.completedAt)}` : ""}`
+        const preview = document.createElement("small");
+        preview.className = "list-preview";
+        preview.textContent = item.description || meta.label;
+        const metadata = document.createElement("small");
+        metadata.className = "list-meta";
+        const clearedDate = item.completedAt ? formatListCompletionDate(item.completedAt) : "";
+        metadata.textContent = item.completed
+            ? `${meta.label} · Cleared${clearedDate ? ` ${clearedDate}` : ""}`
             : `${meta.label} · Added by ${item.createdBy || "Shared"}`;
-        copy.append(title, detail);
+        copy.append(title, preview, metadata);
         copy.addEventListener("click", () => openListDialog(item.id));
 
         const trailing = document.createElement("span");
-        trailing.className = "item-leading";
+        trailing.className = "list-row-icon";
         trailing.appendChild(icon(meta.icon));
         trailing.setAttribute("aria-label", meta.label);
 
@@ -825,6 +836,8 @@ function renderList() {
     });
 
     document.getElementById("list-visible-count").textContent = `${visible.length} ${visible.length === 1 ? "item" : "items"}`;
+    document.getElementById("list-completed-count").textContent = `(${state.listItems.filter((item) => item.completed).length})`;
+    document.getElementById("list-completed-filter").setAttribute("aria-pressed", String(listFilter === "completed"));
     document.getElementById("list-section-title").textContent = listFilter === "all"
         ? "Still to do"
         : listFilter === "completed" ? "Completed" : LIST_CATEGORY_META[listFilter].label;
@@ -850,15 +863,32 @@ function isListItemOwner(item) {
     return Boolean(item?.createdByUserId && authSession?.user?.id && item.createdByUserId === authSession.user.id);
 }
 
+function hideListUndoToast() {
+    clearTimeout(listUndoTimer);
+    listUndoItemId = null;
+    document.getElementById("list-undo-toast").hidden = true;
+}
+
+function showListUndoToast(item) {
+    hideListUndoToast();
+    listUndoItemId = item.id;
+    document.getElementById("list-undo-copy").textContent = `“${item.title}” moved to Completed`;
+    document.getElementById("list-undo-toast").hidden = false;
+    listUndoTimer = setTimeout(hideListUndoToast, 5000);
+}
+
 async function toggleListItemCompletion(id) {
     const item = state.listItems.find((candidate) => candidate.id === id);
-    if (!item) return;
+    if (!item || listCompletionPending.has(id)) return;
+    hideListUndoToast();
     const previous = {
         completed: item.completed,
         completedBy: item.completedBy,
         completedByUserId: item.completedByUserId,
         completedAt: item.completedAt
     };
+    const markingComplete = !item.completed;
+    listCompletionPending.add(id);
     item.completed = !item.completed;
     item.completedBy = item.completed ? state.currentUser : null;
     item.completedByUserId = item.completed ? (authSession?.user?.id || null) : null;
@@ -866,8 +896,7 @@ async function toggleListItemCompletion(id) {
     saveState();
     renderAll();
 
-    if (!cloud) return;
-    const saved = await writeToCloud(cloud.rpc("set_list_item_completion", {
+    const saved = !cloud || await writeToCloud(cloud.rpc("set_list_item_completion", {
         p_item_id: item.id,
         p_completed: item.completed,
         p_completed_by: item.completed ? state.currentUser : null
@@ -877,6 +906,9 @@ async function toggleListItemCompletion(id) {
         saveState();
         renderAll();
     }
+    listCompletionPending.delete(id);
+    renderList();
+    if (saved && markingComplete && item.completed && currentScreen === "list") showListUndoToast(item);
 }
 
 function openListDialog(id = "") {
@@ -903,7 +935,7 @@ function openListDialog(id = "") {
             ? `Added by ${item.createdBy || "your partner"}.${canEdit ? " Tap Edit to change or delete it." : ""}`
             : "Added before account ownership was recorded. This item is view-only, but either person can mark it complete.";
         document.getElementById("list-item-owner-note").textContent = item.completed
-            ? `${meta.completedLabel} by ${item.completedBy || "your partner"}${completedDate ? ` on ${completedDate}` : ""}. ${ownershipNote}`
+            ? `Cleared${completedDate ? ` ${completedDate}` : ""}. ${ownershipNote}`
             : ownershipNote;
         document.getElementById("list-detail-actions").hidden = !canEdit;
     }
@@ -1491,6 +1523,15 @@ document.querySelectorAll("[data-list-filter]").forEach((button) => {
         listFilter = button.dataset.listFilter;
         renderList();
     });
+});
+document.getElementById("list-completed-filter").addEventListener("click", () => {
+    listFilter = listFilter === "completed" ? "all" : "completed";
+    renderList();
+});
+document.getElementById("list-undo-button").addEventListener("click", () => {
+    const id = listUndoItemId;
+    hideListUndoToast();
+    if (id && state.listItems.find((item) => item.id === id)?.completed) toggleListItemCompletion(id);
 });
 
 document.querySelectorAll("[data-errand-filter]").forEach((button) => {
