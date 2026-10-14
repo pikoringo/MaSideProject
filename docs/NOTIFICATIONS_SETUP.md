@@ -8,6 +8,7 @@ The expected two-person traffic is far below the Supabase Free plan's current Ed
 
 - Complete the two-person authentication setup first.
 - Apply [`202610100003_notifications.sql`](../supabase/migrations/202610100003_notifications.sql).
+- Apply [`202610130001_push_service_role_grants.sql`](../supabase/migrations/202610130001_push_service_role_grants.sql) so the backend role can read the private tables used for delivery. This grants nothing to public, anon, or authenticated users.
 - Deploy the `push-notifications` Edge Function with JWT verification disabled. The function validates user tokens itself and separately validates the Cron secret.
 - Leave Supabase's built-in `SUPABASE_PUBLISHABLE_KEYS` and `SUPABASE_SECRET_KEYS` available to the function. It uses their `default` keys, with the legacy anon and service-role keys only as a fallback.
 - Keep all generated private values in Supabase Edge Function secrets, never in this repository.
@@ -69,7 +70,7 @@ select cron.schedule(
 
 iOS and iPadOS require version 16.4 or newer for Home Screen Web Push. Notification preferences sync by account, while permission and the push subscription are stored per device.
 
-If Settings says phone notification setup was rejected, check the `push-notifications` invocation status and logs before changing the iPhone permission. A `401` means the function could not validate the session; a `403` means its member lookup found no matching account. A `503` means the member lookup or server configuration failed. The two approved users must exist in `app_members` with the same user IDs as Supabase Authentication. A successful enable action creates a row in `push_subscriptions`; iOS permission alone does not.
+If Settings says phone notification setup was rejected, check the `push-notifications` invocation status and logs before changing the iPhone permission. A `401` means the function could not validate the session; a `403` means its member lookup found no matching account. A `503` means the member lookup or server configuration failed. If the logs say `permission denied for table app_members`, apply the service-role grants migration above. The two approved users must exist in `app_members` with the same user IDs as Supabase Authentication. A successful enable action creates a row in `push_subscriptions`; iOS permission alone does not.
 
 ## Test matrix
 
