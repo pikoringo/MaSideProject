@@ -6,7 +6,7 @@ MaBestie V2 can synchronize The List, errands, Japan procedure progress, profile
 
 1. Open the MaBestie project in Supabase.
 2. Open **SQL Editor**.
-3. Run [`supabase/migrations/202610080001_v2_shared_data.sql`](../supabase/migrations/202610080001_v2_shared_data.sql) for a new database. For an existing V2 database, run [`supabase/migrations/202610090001_pet_preferences.sql`](../supabase/migrations/202610090001_pet_preferences.sql). If the old `date_ideas` table exists, run [`supabase/migrations/202610090002_restore_legacy_date_ideas.sql`](../supabase/migrations/202610090002_restore_legacy_date_ideas.sql) to copy its entries into The List.
+3. Run [`supabase/migrations/202610080001_v2_shared_data.sql`](../supabase/migrations/202610080001_v2_shared_data.sql) for a new database. For an existing V2 database, run [`supabase/migrations/202610090001_pet_preferences.sql`](../supabase/migrations/202610090001_pet_preferences.sql). Run [`supabase/migrations/202610140001_naughty_pet_state.sql`](../supabase/migrations/202610140001_naughty_pet_state.sql) before using the Naughty pet mood. If the old `date_ideas` table exists, run [`supabase/migrations/202610090002_restore_legacy_date_ideas.sql`](../supabase/migrations/202610090002_restore_legacy_date_ideas.sql) to copy its entries into The List.
 4. Complete the authentication setup below.
 5. Reload the app on both devices. After sign-in, the sync message should change to **Shared & current**.
 
