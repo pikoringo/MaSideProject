@@ -38,7 +38,8 @@ const PET_STATE_META = {
     on_my_way: { row: 3, frameDuration: 140, stillFrame: 2 },
     sleepy: { row: 4, frameDuration: 260, stillFrame: 5 },
     need_a_hug: { row: 5, frameDuration: 220, stillFrame: 5 },
-    happy: { row: 6, frameDuration: 130, stillFrame: 4 }
+    happy: { row: 6, frameDuration: 130, stillFrame: 4 },
+    naughty: { row: 6, frameDuration: 190, stillFrame: 4 }
 };
 
 const STATUS_TO_PET_STATE = {
@@ -731,7 +732,9 @@ function configurePetSprite(element, profile, stateKey = "idle", petId = state.p
     element.dataset.petRow = animation.row;
     element.dataset.frameDuration = animation.frameDuration;
     element.dataset.stillFrame = animation.stillFrame;
-    element.setAttribute("title", `${profile}'s ${pet.label}: ${safeStateKey.replaceAll("_", " ")}`);
+    if (element.id === "partner-pet") {
+        element.setAttribute("aria-label", `${profile}'s ${pet.label} is feeling ${safeStateKey.replaceAll("_", " ")}`);
+    }
     setPetFrame(element, motionPreference.matches ? animation.stillFrame : 0);
 }
 
@@ -757,19 +760,21 @@ function renderHome() {
     const partner = partnerFor(state.currentUser);
     const status = state.statuses[partner] || { value: "", message: "", updatedAt: null };
     configurePetSprite(document.getElementById("partner-pet"), partner, status.petState || petStateForStatus(status.value));
-    document.getElementById("partner-status-name").textContent = `${partner} · status`;
+    document.getElementById("partner-status-name").textContent = `${partner}'s status`;
     document.getElementById("partner-status-text").textContent = status.value || "No status yet";
+    const isStale = status.updatedAt && Date.now() - new Date(status.updatedAt).getTime() >= 24 * 60 * 60 * 1000;
     document.getElementById("partner-status-time").textContent = status.updatedAt
-        ? `${status.message ? `“${status.message}” · ` : ""}${formatRelativeTime(status.updatedAt)}`
-        : "Tap to set yours";
+        ? `${isStale ? "Stale · " : ""}Updated ${formatRelativeTime(status.updatedAt)}`
+        : "Not updated yet";
+    const partnerMessage = document.getElementById("partner-status-message");
+    partnerMessage.textContent = status.message || "";
+    partnerMessage.hidden = !status.message;
 
-    const openErrands = state.errands.filter((errand) => !errand.completed).length;
-    const completedProcedures = completedProcedureCount();
-    const openListItems = state.listItems.filter((item) => !item.completed).length;
-    document.getElementById("home-list-count").textContent = `${openListItems} still on the list`;
-    document.getElementById("home-errand-count").textContent = `${openErrands} open`;
-    document.getElementById("home-procedure-count").textContent = `${completedProcedures} of ${PROCEDURES.length} complete`;
-    document.getElementById("home-procedures-card").hidden = state.proceduresArchived;
+    const ownStatus = state.statuses[state.currentUser] || { value: "", message: "" };
+    document.getElementById("home-own-status-text").textContent = ownStatus.value || "No status yet";
+    const ownMessage = document.getElementById("home-own-status-message");
+    ownMessage.textContent = ownStatus.message || "";
+    ownMessage.hidden = !ownStatus.message;
 }
 
 function formatRelativeTime(isoString) {
@@ -1655,7 +1660,7 @@ document.getElementById("errand-form").addEventListener("submit", (event) => {
 });
 document.getElementById("delete-errand-button").addEventListener("click", deleteErrand);
 
-document.getElementById("partner-status-card").addEventListener("click", openStatusDialog);
+document.getElementById("set-status-button").addEventListener("click", openStatusDialog);
 document.getElementById("status-form").addEventListener("submit", (event) => {
     event.preventDefault();
     saveStatus();

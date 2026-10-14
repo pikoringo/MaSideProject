@@ -20,6 +20,7 @@ The pet is selected per profile. Pet selection and pet state are synchronized so
 | `sleepy` | Resting or ready for bed | Yawn, curl beside tail | Yawn, curl into tail |
 | `need_a_hug` | Wants attention or comfort | Droop, then reach forward | Sad posture, then open arms |
 | `happy` | Excited or celebrating | Dramatic dance and crown bounce | Excited hops and tiny dance |
+| `naughty` | Playful mischief | Side-to-side tilt and quick hop | Side-to-side peek and quick hop |
 
 `idle` is the default. Status copy remains visible next to the pet so meaning never depends on animation alone.
 
@@ -31,7 +32,7 @@ The pet is selected per profile. Pet selection and pet state are synchronized so
 - [`royal-lemur-sprites-v1.png`](../images/pets/royal-lemur-sprites-v1.png) — retained as the softer initial exploration
 - [`tiny-lemur-sprites-v1.png`](../images/pets/tiny-lemur-sprites-v1.png)
 
-Each current sheet contains seven rows in the state order above and six frames per row. The web app treats every sheet as a deterministic 6-by-7 atlas and clips it through a fixed-aspect viewport. A later art-polish pass may still tighten individual ground anchors.
+Each current sheet contains seven source rows (through `happy`) and six frames per row. The web app treats every sheet as a deterministic 6-by-7 atlas and clips it through a fixed-aspect viewport. `naughty` currently reuses the happy row with a distinct frame cadence and pet-specific movement; dedicated Naughty frames are a later art pass. A later art-polish pass may still tighten individual ground anchors.
 
 Production web atlases are generated from those concept sheets with [`scripts/normalize_sprite_atlas.py`](../scripts/normalize_sprite_atlas.py). The normalizer isolates each pose, applies a stable scale within each animation row, centers it horizontally, and aligns it to a shared ground line. The app currently loads:
 
@@ -52,17 +53,18 @@ Existing status labels map to pet states as follows:
 ## Playback rules
 
 - Use 6–10 frames per second depending on the motion.
-- Loop `idle`, `hungry`, `busy`, `on_my_way`, and `happy` while the pet is visible.
+- Loop `idle`, `hungry`, `busy`, `on_my_way`, `happy`, and `naughty` while the pet is visible.
 - Play the transition into `sleepy` or `need_a_hug`, then hold or use a slower loop.
 - Pause animation when the page is hidden.
 - Under `prefers-reduced-motion`, show the most expressive static frame.
+- On Home, do not print the pet-state name; the animation carries that expression while the activity and optional message stay readable. The editor keeps labeled state choices.
 
 ## Data shape
 
 Each profile needs:
 
 - `pet_id`: `royal_lemur` or `tiny_lemur`
-- `pet_state`: one of the seven state keys
+- `pet_state`: one of the eight state keys
 - `status_message`: optional short text
 - `status_updated_at`: timestamp used for freshness in the web app
 

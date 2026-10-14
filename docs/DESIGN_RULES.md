@@ -2,7 +2,7 @@
 
 **Canonical direction:** Quiet Accent
 
-**Last updated:** October 12, 2026
+**Last updated:** October 14, 2026
 
 All UI work must follow this document. If a new component or icon is needed, extend this system deliberately instead of introducing a one-off style.
 
@@ -173,6 +173,11 @@ Rin's dark appearance uses:
 
 - Pets and avatars may be colorful, illustrated, or animated.
 - Keep status text and last-updated time visually stronger than decoration.
+- On Home, give the partner pet a larger neutral stage, then show the activity, full optional message, and update time without truncation. The pet expresses its mood through motion; do not print the mood name in the Home status display.
+- Give the pet a screen-reader label for its mood even though the mood name is not visible on Home.
+- Put the user's own status and a labeled **Set yours** action below the partner status. The mood picker may use text labels so choices remain understandable and accessible.
+- Use a multiline field for the optional status message so the full draft is visible while editing.
+- Keep Survival guide reachable below the status area on Home. Do not duplicate footer destinations such as The List, Errands, or Settings as Home feature cards.
 - Use `--affection` only for current partner status or affectionate signals in Rin's theme.
 - Stale status must be communicated in text, not only by fading or color.
 

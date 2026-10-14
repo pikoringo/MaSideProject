@@ -4,7 +4,7 @@
 
 **Audience:** The two MaBestie users and contributors
 
-**Last updated:** October 12, 2026
+**Last updated:** October 14, 2026
 
 ## 1. Product summary
 
@@ -135,18 +135,21 @@ Initial status choices:
 - Resting
 - Need a hug
 
-Each profile also selects one of two original pixel pets: a theatrical royal lemur or a tiny wide-eyed lemur. The initial pet states are Idle, Hungry, Busy, On my way, Sleepy, Need a hug, and Happy. Each state has a distinct animation for both pets while keeping the same underlying state key.
+Each profile also selects one of two original pixel pets: a theatrical royal lemur or a tiny wide-eyed lemur. The pet states are Idle, Hungry, Busy, On my way, Sleepy, Need a hug, Happy, and Naughty. Each state has a distinct animation for both pets while keeping the same underlying state key.
 
 Requirements:
 
 - Show the user's pet, status label, optional short message, and last-updated time.
-- Display the partner's latest status on Home.
+- Display the partner's latest status in a pet-focused Home card, with the entire optional message visible rather than cut off.
+- Express the pet mood through animation on Home without spelling out the mood name there; keep mood names in the editor for selection.
+- Show the current user's status with a **Set yours** action below the partner card. Keep Survival guide farther down Home while omitting cards for destinations already in the footer.
 - Clearly identify stale status with its timestamp.
 - Store only the latest active status per user initially.
 - Allow pet selection from Settings without changing the signed-in account or active character.
 - Allow the user to choose a pet mood independently; choosing a status suggests the closest mood, which can be overridden before saving.
 - Synchronize the selected pet, pet state, optional message, and last-updated time.
 - Respect reduced-motion preferences with a representative static frame.
+- Include a playful `naughty` mood for both pets. Its initial animation may choreograph the existing sprite frames until dedicated art is available.
 
 The web app loops sprite animation while visible. There is no native iOS app or home-screen widget in the current product plan; the project remains free to use as a web app. The canonical web animation specification lives in [PET_ANIMATION_SPEC.md](PET_ANIMATION_SPEC.md).
 
