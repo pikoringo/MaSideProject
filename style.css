@@ -318,14 +318,101 @@ p {
 }
 
 .partner-status {
-    width: 100%;
-    min-height: 92px;
+    padding: 16px;
+}
+
+.home-status-heading {
+    margin-top: 20px;
+}
+
+.partner-pet-stage {
+    min-height: 164px;
     display: grid;
-    grid-template-columns: 64px 1fr 20px;
-    gap: 12px;
+    place-items: center;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: var(--surface-subtle);
+}
+
+.pet-tile-home {
+    width: 154px;
+    max-width: 55%;
+    background: transparent;
+}
+
+.partner-status > strong {
+    display: block;
+    font-size: 18px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.partner-status-time {
+    display: block;
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.partner-status-message {
+    margin: 12px 0 0;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--surface-subtle);
+    font-size: 15px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.home-own-status,
+.home-survival {
+    margin-top: 24px;
+}
+
+.home-own-status h2,
+.home-survival h2 {
+    margin-bottom: 10px;
+}
+
+.home-own-row {
+    display: flex;
     align-items: center;
-    padding: 14px;
-    text-align: left;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.home-own-row > div {
+    min-width: 0;
+}
+
+.home-own-row strong,
+.home-own-row span {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.home-own-row strong {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.home-own-row span {
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.home-own-row button {
+    flex: none;
+}
+
+.home-survival .feature-card {
+    width: 100%;
+    min-height: 108px;
 }
 
 .pet-tile {
@@ -348,8 +435,24 @@ p {
     will-change: transform;
 }
 
-.pet-tile-compact {
-    width: 64px;
+.pet-tile[data-pet-state="naughty"][data-pet="royal_lemur"] {
+    animation: royal-naughty 1.8s steps(2, end) infinite;
+}
+
+.pet-tile[data-pet-state="naughty"][data-pet="tiny_lemur"] {
+    animation: tiny-naughty 1.8s steps(2, end) infinite;
+}
+
+@keyframes royal-naughty {
+    0%, 22%, 78%, 100% { transform: rotate(0); }
+    23%, 48% { transform: rotate(-5deg); }
+    49%, 77% { transform: translateY(-5px) rotate(5deg); }
+}
+
+@keyframes tiny-naughty {
+    0%, 22%, 78%, 100% { transform: translateX(0); }
+    23%, 48% { transform: translateX(-5px) rotate(-4deg); }
+    49%, 77% { transform: translate(4px, -6px) rotate(4deg); }
 }
 
 .status-pet-preview {
@@ -368,29 +471,6 @@ p {
     background: transparent;
 }
 
-.partner-status-copy {
-    min-width: 0;
-    display: grid;
-    gap: 2px;
-}
-
-.partner-status-copy small,
-.partner-status-copy span {
-    overflow: hidden;
-    color: var(--text-muted);
-    font-size: 12px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.partner-status-copy strong {
-    overflow: hidden;
-    font-size: 15px;
-    font-weight: 500;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .section-heading {
     display: flex;
     align-items: center;
@@ -402,12 +482,6 @@ p {
 .section-heading span {
     color: var(--text-muted);
     font-size: 12px;
-}
-
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
 }
 
 .feature-card {
@@ -1475,10 +1549,6 @@ textarea {
     .list-add-dock {
         padding-right: 14px;
         padding-left: 14px;
-    }
-
-    .feature-grid {
-        gap: 8px;
     }
 
     .feature-card {
