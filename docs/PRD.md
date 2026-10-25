@@ -58,11 +58,12 @@ When the Japan Procedures list is archived, its footer item disappears. Archived
 
 Rename **Our Ideas** and **Date Ideas** to **The List** throughout the app.
 
-The List is a shared collection with these initial categories:
+The List is a shared collection with these categories:
 
 - Movies
 - Places to go
 - Food to eat
+- Games to play
 - Wishlist items to buy
 
 Requirements:
@@ -119,21 +120,28 @@ The default view shows open errands first, with compact summaries for open, due-
 
 Recurring errands require a due date. Completing one preserves the completed occurrence and creates the next weekly or monthly occurrence with an advanced due date.
 
-### 4.4 Survival Guide
+### 4.4 Shared Space: Survival Guide and Shared Notes
 
-The Home screen links to a reference screen with Japan's emergency numbers (police 110, fire/ambulance 119, coast guard 118) and the Maebashi garbage sorting guide and its iPhone app. Numbers are labeled and dialable. External resources point to the original official city page and app listing. This guide remains available even when the Japan procedure list is archived.
+The Home screen includes a **Shared space** section featuring two companion destinations:
+
+1. **Shared notes**: A shared multi-note board where either user can add, edit, or delete notes with titles and content (e.g. Wi-Fi passwords, door codes, reminders, or sweet memos). Notes display author attribution and timestamps, and synchronize across devices in real time via Supabase.
+2. **Survival guide**: A reference screen with Japan's emergency numbers (police 110, fire/ambulance 119, coast guard 118) and the Maebashi garbage sorting guide and its iPhone app. Numbers are labeled and dialable. External resources point to the original official city page and app listing. This guide remains available even when the Japan procedure list is archived.
 
 ### 4.5 Pet status in the web app
 
 Each user has a distinct pet or avatar. A user sets only their own status; their partner sees that status in the web app.
 
-Initial status choices:
+Quick status choices:
 
-- At work
-- Studying
-- On my way
-- Resting
-- Need a hug
+- At work (busy)
+- Studying (busy)
+- On my way (on_my_way)
+- Resting (sleepy)
+- Need a hug (need_a_hug)
+- Chilling (idle)
+- Eating (hungry)
+- Happy (happy)
+- Heading home (on_my_way)
 
 Each profile also selects one of two original pixel pets: a theatrical royal lemur or a tiny wide-eyed lemur. The pet states are Idle, Hungry, Busy, On my way, Sleepy, Need a hug, Happy, and Naughty. Each state has a distinct animation for both pets while keeping the same underlying state key.
 
@@ -168,7 +176,7 @@ Requirements:
 Initial profile themes:
 
 - **Mono:** black, white, and graphite for Julius
-- **Lilac:** a neutral base with a quiet lavender accent for Rin
+- **Lilac:** a soft lilac and clean white palette for Rin, intentionally locked to a crisp light mode with gentle lavender accents regardless of device dark mode settings
 
 Coral is reserved for affectionate or status-related highlights in Rin's theme. It is not a general-purpose surface color.
 

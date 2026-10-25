@@ -77,10 +77,16 @@
 
                     <section class="home-survival" aria-labelledby="home-survival-heading">
                         <h2 id="home-survival-heading">Shared space</h2>
-                        <button class="feature-card card" type="button" data-open-screen="survival">
-                            <span class="feature-icon"><i data-lucide="shield-alert" aria-hidden="true"></i></span>
-                            <span><strong>Survival guide</strong><small>Emergency numbers &amp; garbage sorting</small></span>
-                        </button>
+                        <div class="shared-space-cards">
+                            <button class="feature-card card" type="button" data-open-screen="notes">
+                                <span class="feature-icon"><i data-lucide="notebook-pen" aria-hidden="true"></i></span>
+                                <span><strong>Shared notes</strong><small id="home-notes-summary">0 notes · Read and add shared memos</small></span>
+                            </button>
+                            <button class="feature-card card" type="button" data-open-screen="survival">
+                                <span class="feature-icon"><i data-lucide="shield-alert" aria-hidden="true"></i></span>
+                                <span><strong>Survival guide</strong><small>Emergency numbers &amp; garbage sorting</small></span>
+                            </button>
+                        </div>
                     </section>
                 </section>
 
@@ -90,6 +96,7 @@
                         <button class="filter-chip" type="button" data-list-filter="movies" aria-pressed="false"><i data-lucide="clapperboard" aria-hidden="true"></i>Movies</button>
                         <button class="filter-chip" type="button" data-list-filter="places" aria-pressed="false"><i data-lucide="map-pin" aria-hidden="true"></i>Places</button>
                         <button class="filter-chip" type="button" data-list-filter="food" aria-pressed="false"><i data-lucide="utensils" aria-hidden="true"></i>Food</button>
+                        <button class="filter-chip" type="button" data-list-filter="games" aria-pressed="false"><i data-lucide="gamepad-2" aria-hidden="true"></i>Games</button>
                         <button class="filter-chip" type="button" data-list-filter="wishlist" aria-pressed="false"><i data-lucide="gift" aria-hidden="true"></i>Wishlist</button>
                     </div>
                     <div class="section-heading list-section-heading">
@@ -146,6 +153,32 @@
                             <span class="item-copy"><strong>さんあ〜る for iPhone</strong><small>Garbage sorting app · App Store</small></span>
                             <i data-lucide="external-link" aria-hidden="true"></i>
                         </a>
+                    </div>
+                </section>
+
+                <section class="screen" id="notes-screen" data-screen="notes" hidden>
+                    <div class="screen-back-row">
+                        <button class="ghost-back-button" type="button" data-nav-screen="home">
+                            <i data-lucide="chevron-left" aria-hidden="true"></i>
+                            <span>Back to Home</span>
+                        </button>
+                    </div>
+                    <div class="section-heading">
+                        <div>
+                            <h2>Shared notes</h2>
+                            <span id="notes-count">0 notes</span>
+                        </div>
+                    </div>
+                    <div class="notes-list" id="notes-items"></div>
+                    <div class="empty-state" id="notes-empty" hidden>
+                        <i data-lucide="notebook-pen" aria-hidden="true"></i>
+                        <h2>No shared notes yet</h2>
+                        <p>Write down a wifi password, door code, reminder, or sweet message together.</p>
+                    </div>
+                    <div class="list-add-dock">
+                        <button class="primary-button block-button" id="add-note-button" type="button">
+                            <i data-lucide="plus" aria-hidden="true"></i>Add a note
+                        </button>
                     </div>
                 </section>
 
@@ -257,7 +290,7 @@
             </div>
             <div id="list-item-fields">
                 <label class="field-label" for="list-item-category">Category</label>
-                <select id="list-item-category" required><option value="movies">Movies</option><option value="places">Places to go</option><option value="food">Food to eat</option><option value="wishlist">Wishlist</option></select>
+                <select id="list-item-category" required><option value="movies">Movies</option><option value="places">Places to go</option><option value="food">Food to eat</option><option value="games">Games to play</option><option value="wishlist">Wishlist</option></select>
                 <label class="field-label" for="list-item-title">Title</label>
                 <input id="list-item-title" type="text" maxlength="100" required>
                 <label class="field-label" for="list-item-description">Description</label>
@@ -288,6 +321,20 @@
         </form>
     </dialog>
 
+    <dialog id="note-dialog" class="app-dialog">
+        <form method="dialog" id="note-form">
+            <div class="dialog-header"><div><p class="eyebrow">Shared notes</p><h2 id="note-dialog-title">New note</h2></div><button class="icon-button" type="button" data-close-dialog="note-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
+            <input type="hidden" id="note-id">
+            <div id="note-fields">
+                <label class="field-label" for="note-title">Title</label>
+                <input id="note-title" type="text" maxlength="80" placeholder="e.g. Wi-Fi password, Grocery wishlist" required>
+                <label class="field-label" for="note-content">Note</label>
+                <textarea id="note-content" rows="6" maxlength="2000" placeholder="Write whatever you want to share..." required></textarea>
+            </div>
+            <div class="dialog-actions" id="note-dialog-actions"><button class="danger-button" id="delete-note-button" type="button"><i data-lucide="trash-2" aria-hidden="true"></i>Delete</button><button class="primary-button" type="submit"><i data-lucide="check" aria-hidden="true"></i>Save note</button></div>
+        </form>
+    </dialog>
+
     <dialog id="status-dialog" class="app-dialog">
         <form method="dialog" id="status-form">
             <div class="dialog-header"><div><p class="eyebrow">Pet status</p><h2>Set your status</h2></div><button class="icon-button" type="button" data-close-dialog="status-dialog" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button></div>
@@ -301,6 +348,10 @@
                 <button type="button" data-status="On my way">On my way</button>
                 <button type="button" data-status="Resting">Resting</button>
                 <button type="button" data-status="Need a hug">Need a hug</button>
+                <button type="button" data-status="Chilling">Chilling</button>
+                <button type="button" data-status="Eating">Eating</button>
+                <button type="button" data-status="Happy">Happy</button>
+                <button type="button" data-status="Heading home">Heading home</button>
             </div>
             <span class="field-label">Pet mood</span>
             <div class="status-options" id="pet-state-options" role="group" aria-label="Pet mood">
@@ -332,6 +383,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/dist/umd/supabase.min.js"></script>
-    <script src="app.js?v=8"></script>
+    <script src="app.js?v=9"></script>
 </body>
 </html>

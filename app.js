@@ -47,7 +47,11 @@ const STATUS_TO_PET_STATE = {
     Studying: "busy",
     "On my way": "on_my_way",
     Resting: "sleepy",
-    "Need a hug": "need_a_hug"
+    "Need a hug": "need_a_hug",
+    Chilling: "idle",
+    Eating: "hungry",
+    Happy: "happy",
+    "Heading home": "on_my_way"
 };
 
 const DEFAULT_NOTIFICATION_PREFERENCES = {
@@ -66,6 +70,7 @@ const LIST_CATEGORY_META = {
     movies: { label: "Movies", icon: "clapperboard", completedLabel: "Watched" },
     places: { label: "Places to go", icon: "map-pin", completedLabel: "Visited" },
     food: { label: "Food to eat", icon: "utensils", completedLabel: "Tried" },
+    games: { label: "Games to play", icon: "gamepad-2", completedLabel: "Played" },
     wishlist: { label: "Wishlist", icon: "gift", completedLabel: "Bought" }
 };
 
@@ -81,6 +86,7 @@ const SCREEN_META = {
     list: { title: "The List", eyebrow: "Saved together" },
     procedures: { title: "Japan procedures", eyebrow: "Arrival checklist" },
     survival: { title: "Survival guide", eyebrow: "Useful in Japan" },
+    notes: { title: "Shared notes", eyebrow: "Memos for two" },
     errands: { title: "Errands", eyebrow: "Shared responsibilities" },
     settings: { title: "Settings", eyebrow: "Your preferences" }
 };
@@ -195,10 +201,29 @@ function createInitialState() {
             createSeedErrand("Return parcel at the konbini", "pickup", "Rin", "", "", "Bring the return QR code."),
             createSeedErrand("Take out burnable trash", "home", "both", "", "weekly", "Tuesday and Friday mornings.")
         ],
+        notes: [
+            createSeedNote("Apartment Wi-Fi", "Network: MaBestie_5G\nPassword: happy-lemurs-together", "Julius"),
+            createSeedNote("Konbini favorites", "Rin's favorites: peach tea, egg sandwich, melon pan!\nJulius: iced coffee, karaage-kun.", "Rin")
+        ],
         procedureProgress,
         proceduresArchived: false,
         proceduresArchivedAt: null,
         notificationPreferences: { ...DEFAULT_NOTIFICATION_PREFERENCES }
+    };
+}
+
+function createSeedNote(title, content, createdBy) {
+    const timestamp = new Date().toISOString();
+    return {
+        id: makeId(),
+        title,
+        content,
+        createdBy,
+        createdByUserId: null,
+        updatedBy: createdBy,
+        updatedByUserId: null,
+        createdAt: timestamp,
+        updatedAt: timestamp
     };
 }
 
@@ -283,6 +308,7 @@ function loadState() {
             notificationPreferences: { ...initial.notificationPreferences, ...saved.notificationPreferences },
             listItems: Array.isArray(saved.listItems) ? saved.listItems : initial.listItems,
             errands: Array.isArray(saved.errands) ? saved.errands : initial.errands,
+            notes: Array.isArray(saved.notes) ? saved.notes : initial.notes,
             procedureProgress: { ...initial.procedureProgress, ...saved.procedureProgress }
         };
     } catch (error) {
@@ -410,6 +436,34 @@ function toErrandRow(errand) {
     };
 }
 
+function fromNoteRow(row) {
+    return {
+        id: row.id,
+        title: row.title || "",
+        content: row.content || "",
+        createdBy: row.created_by,
+        createdByUserId: row.created_by_user_id || null,
+        updatedBy: row.updated_by || row.created_by,
+        updatedByUserId: row.updated_by_user_id || null,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+    };
+}
+
+function toNoteRow(note) {
+    return {
+        id: note.id,
+        title: note.title,
+        content: note.content,
+        created_by: note.createdBy || state.currentUser,
+        created_by_user_id: note.createdByUserId || authSession?.user?.id || null,
+        updated_by: note.updatedBy || state.currentUser,
+        updated_by_user_id: authSession?.user?.id || note.updatedByUserId || null,
+        created_at: note.createdAt || new Date().toISOString(),
+        updated_at: note.updatedAt || new Date().toISOString()
+    };
+}
+
 function fromNotificationPreferences(row) {
     return {
         statusUpdates: row?.status_updates ?? true,
@@ -436,24 +490,26 @@ function toNotificationPreferencesRow() {
 }
 
 async function querySharedState() {
-    const [profilesResult, listResult, procedureListResult, progressResult, errandsResult, preferencesResult] = await Promise.all([
+    const [profilesResult, listResult, procedureListResult, progressResult, errandsResult, preferencesResult, notesResult] = await Promise.all([
         cloud.from("profiles").select("*"),
         cloud.from("list_items").select("*").order("created_at"),
         cloud.from("procedure_lists").select("*").eq("id", PROCEDURE_LIST_ID).single(),
         cloud.from("procedure_progress").select("*").eq("list_id", PROCEDURE_LIST_ID),
         cloud.from("errands").select("*").order("created_at"),
-        cloud.from("notification_preferences").select("*").eq("user_id", authSession.user.id).maybeSingle()
+        cloud.from("notification_preferences").select("*").eq("user_id", authSession.user.id).maybeSingle(),
+        cloud.from("shared_notes").select("*").order("updated_at", { ascending: false })
     ]);
-    const error = [profilesResult, listResult, procedureListResult, progressResult, errandsResult, preferencesResult]
+    const criticalError = [profilesResult, listResult, procedureListResult, progressResult, errandsResult, preferencesResult]
         .find((result) => result.error)?.error;
-    if (error) throw error;
+    if (criticalError) throw criticalError;
     return {
         profiles: profilesResult.data,
         listItems: listResult.data,
         procedureList: procedureListResult.data,
         progress: progressResult.data,
         errands: errandsResult.data,
-        notificationPreferences: preferencesResult.data
+        notificationPreferences: preferencesResult.data,
+        notes: notesResult?.data || []
     };
 }
 
@@ -464,6 +520,9 @@ async function initializeEmptyCollections(remote) {
     }
     if (!remote.errands.length && state.errands.length) {
         writes.push(cloud.from("errands").upsert(state.errands.map(toErrandRow)));
+    }
+    if (Array.isArray(remote.notes) && !remote.notes.length && state.notes?.length) {
+        writes.push(cloud.from("shared_notes").upsert(state.notes.map(toNoteRow)));
     }
     if (!remote.progress.length) {
         const completedRows = Object.entries(state.procedureProgress)
@@ -493,6 +552,9 @@ function applySharedState(remote) {
     });
     state.listItems = remote.listItems.map(fromListRow);
     state.errands = remote.errands.map(fromErrandRow);
+    if (Array.isArray(remote.notes) && remote.notes.length) {
+        state.notes = remote.notes.map(fromNoteRow);
+    }
     state.notificationPreferences = fromNotificationPreferences(remote.notificationPreferences);
     state.procedureProgress = Object.fromEntries(PROCEDURES.map((procedure) => [procedure.id, false]));
     remote.progress.forEach((row) => {
@@ -530,7 +592,7 @@ function scheduleCloudRefresh() {
 function subscribeToCloud() {
     if (!cloud || cloudChannel) return;
     cloudChannel = cloud.channel("mabestie-v2");
-    ["profiles", "list_items", "procedure_lists", "procedure_progress", "errands"].forEach((table) => {
+    ["profiles", "list_items", "procedure_lists", "procedure_progress", "errands", "shared_notes"].forEach((table) => {
         cloudChannel.on("postgres_changes", { event: "*", schema: "public", table }, (payload) => {
             handleRealtimeNotification(table, payload);
             scheduleCloudRefresh();
@@ -612,6 +674,14 @@ function handleRealtimeNotification(table, payload) {
             showNotificationToast("Errand completed", record.title);
         }
     }
+
+    if (table === "shared_notes" && isPartnerChange(record, "updated_by_user_id")) {
+        if (payload.eventType === "INSERT") {
+            showNotificationToast("New shared note", `${record.created_by || "Your partner"} added "${record.title}"`);
+        } else if (payload.eventType === "UPDATE") {
+            showNotificationToast("Note updated", `${record.updated_by || "Your partner"} updated "${record.title}"`);
+        }
+    }
 }
 
 function refreshIcons() {
@@ -668,6 +738,7 @@ function applyTheme() {
     const fallback = PROFILE_META[profile]?.defaultTheme || "mono";
     const theme = state.themes[profile] || fallback;
     appShell.dataset.profileTheme = theme;
+    document.documentElement.dataset.theme = theme;
     headerAvatar.src = PROFILE_META[profile].avatar;
     headerAvatar.alt = `${profile}'s avatar`;
 }
@@ -697,6 +768,7 @@ function navigate(screen) {
 function renderAll() {
     applyTheme();
     renderHome();
+    renderNotes();
     renderList();
     renderProcedures();
     renderErrands();
@@ -775,6 +847,14 @@ function renderHome() {
     const ownMessage = document.getElementById("home-own-status-message");
     ownMessage.textContent = ownStatus.message || "";
     ownMessage.hidden = !ownStatus.message;
+
+    const notesSummary = document.getElementById("home-notes-summary");
+    if (notesSummary) {
+        const count = Array.isArray(state.notes) ? state.notes.length : 0;
+        notesSummary.textContent = count === 0
+            ? "No notes yet · Tap to write one"
+            : `${count} note${count === 1 ? "" : "s"} · Read and add shared memos`;
+    }
 }
 
 function formatRelativeTime(isoString) {
@@ -1013,6 +1093,160 @@ function deleteListItem() {
     document.getElementById("list-item-dialog").close();
     renderAll();
     if (cloud) writeToCloud(cloud.from("list_items").delete().eq("id", id));
+}
+
+let selectedNoteId = null;
+
+function renderNotes() {
+    const list = document.getElementById("notes-items");
+    const empty = document.getElementById("notes-empty");
+    const count = document.getElementById("notes-count");
+    if (!list) return;
+
+    const notes = Array.isArray(state.notes) ? [...state.notes] : [];
+    notes.sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+
+    if (count) count.textContent = `${notes.length} note${notes.length === 1 ? "" : "s"}`;
+    if (empty) empty.hidden = notes.length > 0;
+    list.hidden = notes.length === 0;
+
+    const homeSummary = document.getElementById("home-notes-summary");
+    if (homeSummary) {
+        homeSummary.textContent = notes.length === 0
+            ? "No notes yet · Tap to write one"
+            : `${notes.length} note${notes.length === 1 ? "" : "s"} · Read and add shared memos`;
+    }
+
+    list.replaceChildren();
+    notes.forEach((note) => {
+        const card = document.createElement("article");
+        card.className = "note-card";
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-label", `Note: ${note.title}`);
+
+        const title = document.createElement("strong");
+        title.className = "note-card-title";
+        title.textContent = note.title;
+
+        const body = document.createElement("p");
+        body.className = "note-card-body";
+        body.textContent = note.content;
+
+        const meta = document.createElement("div");
+        meta.className = "note-card-meta";
+        const author = note.updatedBy || note.createdBy || "Partner";
+        const time = note.updatedAt || note.createdAt;
+        const metaText = document.createElement("span");
+        metaText.textContent = `Updated by ${author} · ${formatRelativeTime(time)}`;
+        meta.appendChild(metaText);
+        meta.appendChild(icon("chevron-right"));
+
+        card.appendChild(title);
+        card.appendChild(body);
+        card.appendChild(meta);
+
+        card.addEventListener("click", () => openNoteDialog(note.id));
+        card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openNoteDialog(note.id);
+            }
+        });
+
+        list.appendChild(card);
+    });
+
+    refreshIcons();
+}
+
+function openNoteDialog(noteId = null) {
+    selectedNoteId = noteId;
+    const dialog = document.getElementById("note-dialog");
+    const titleInput = document.getElementById("note-title");
+    const contentInput = document.getElementById("note-content");
+    const dialogTitle = document.getElementById("note-dialog-title");
+    const deleteBtn = document.getElementById("delete-note-button");
+
+    if (noteId) {
+        const note = state.notes.find((n) => n.id === noteId);
+        if (!note) return;
+        dialogTitle.textContent = "Edit note";
+        document.getElementById("note-id").value = note.id;
+        titleInput.value = note.title;
+        contentInput.value = note.content;
+        deleteBtn.hidden = false;
+    } else {
+        dialogTitle.textContent = "New note";
+        document.getElementById("note-id").value = "";
+        titleInput.value = "";
+        contentInput.value = "";
+        deleteBtn.hidden = true;
+    }
+
+    dialog.showModal();
+    titleInput.focus();
+}
+
+async function saveNote(event) {
+    event.preventDefault();
+    const id = document.getElementById("note-id").value;
+    const title = document.getElementById("note-title").value.trim();
+    const content = document.getElementById("note-content").value.trim();
+    if (!title || !content) return;
+
+    const timestamp = new Date().toISOString();
+    let note;
+
+    if (id) {
+        const index = state.notes.findIndex((n) => n.id === id);
+        if (index === -1) return;
+        note = {
+            ...state.notes[index],
+            title,
+            content,
+            updatedBy: state.currentUser,
+            updatedByUserId: authSession?.user?.id || null,
+            updatedAt: timestamp
+        };
+        state.notes[index] = note;
+    } else {
+        note = {
+            id: makeId(),
+            title,
+            content,
+            createdBy: state.currentUser,
+            createdByUserId: authSession?.user?.id || null,
+            updatedBy: state.currentUser,
+            updatedByUserId: authSession?.user?.id || null,
+            createdAt: timestamp,
+            updatedAt: timestamp
+        };
+        state.notes.unshift(note);
+    }
+
+    saveState();
+    document.getElementById("note-dialog").close();
+    renderAll();
+
+    if (cloud) {
+        writeToCloud(cloud.from("shared_notes").upsert(toNoteRow(note)));
+    }
+}
+
+async function deleteNote(noteId) {
+    if (!noteId) return;
+    const index = state.notes.findIndex((n) => n.id === noteId);
+    if (index === -1) return;
+
+    state.notes.splice(index, 1);
+    saveState();
+    document.getElementById("note-dialog").close();
+    renderAll();
+
+    if (cloud) {
+        writeToCloud(cloud.from("shared_notes").delete().eq("id", noteId));
+    }
 }
 
 function renderProcedures() {
@@ -1659,6 +1893,19 @@ document.getElementById("errand-form").addEventListener("submit", (event) => {
     saveErrand();
 });
 document.getElementById("delete-errand-button").addEventListener("click", deleteErrand);
+
+const addNoteButton = document.getElementById("add-note-button");
+if (addNoteButton) {
+    addNoteButton.addEventListener("click", () => openNoteDialog());
+}
+const noteForm = document.getElementById("note-form");
+if (noteForm) {
+    noteForm.addEventListener("submit", saveNote);
+}
+const deleteNoteButton = document.getElementById("delete-note-button");
+if (deleteNoteButton) {
+    deleteNoteButton.addEventListener("click", () => deleteNote(selectedNoteId));
+}
 
 document.getElementById("set-status-button").addEventListener("click", openStatusDialog);
 document.getElementById("status-form").addEventListener("submit", (event) => {

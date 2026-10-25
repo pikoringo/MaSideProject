@@ -79,19 +79,43 @@ button:disabled {
     display: none !important;
 }
 
+html[data-theme="lilac"],
+body:has(.app-shell[data-profile-theme="lilac"]) {
+    color-scheme: light;
+    background: #fbf9fd;
+}
+
 .app-shell[data-profile-theme="lilac"] {
+    color-scheme: light;
+    --background: #fbf9fd;
+    --surface: #ffffff;
+    --surface-subtle: #f4ecf9;
+    --text: #1f1b24;
+    --text-muted: #6e6777;
+    --border: #e7e0ee;
+    --shadow: rgba(35, 15, 50, 0.07);
+    --danger: #b42318;
     --accent: #7d68a7;
     --accent-foreground: #ffffff;
-    --accent-soft: #f0ebf7;
+    --accent-soft: #efe6f8;
     --affection: #d96e61;
 }
 
 @media (prefers-color-scheme: dark) {
     .app-shell[data-profile-theme="lilac"] {
-        --accent: #baa5e4;
-        --accent-foreground: #1c1428;
-        --accent-soft: #2f2939;
-        --affection: #f69a8e;
+        color-scheme: light;
+        --background: #fbf9fd;
+        --surface: #ffffff;
+        --surface-subtle: #f4ecf9;
+        --text: #1f1b24;
+        --text-muted: #6e6777;
+        --border: #e7e0ee;
+        --shadow: rgba(35, 15, 50, 0.07);
+        --danger: #b42318;
+        --accent: #7d68a7;
+        --accent-foreground: #ffffff;
+        --accent-soft: #efe6f8;
+        --affection: #d96e61;
     }
 }
 
@@ -408,6 +432,11 @@ p {
 
 .home-own-row button {
     flex: none;
+}
+
+.shared-space-cards {
+    display: grid;
+    gap: 12px;
 }
 
 .home-survival .feature-card {
@@ -1525,6 +1554,85 @@ textarea {
     border-color: var(--accent);
     background: var(--accent);
     color: var(--accent-foreground);
+}
+
+.screen-back-row {
+    margin-bottom: 12px;
+}
+
+.ghost-back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 6px 4px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 150ms ease;
+}
+
+.ghost-back-button:hover {
+    color: var(--text);
+}
+
+.ghost-back-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.notes-list {
+    display: grid;
+    gap: 12px;
+}
+
+.note-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.note-card:hover {
+    border-color: var(--accent);
+}
+
+.note-card-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.note-card-body {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.45;
+    white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.note-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
 }
 
 .confirmation-dialog p {
