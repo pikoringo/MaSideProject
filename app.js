@@ -739,6 +739,7 @@ function applyTheme() {
     const theme = state.themes[profile] || fallback;
     appShell.dataset.profileTheme = theme;
     document.documentElement.dataset.theme = theme;
+    document.body.dataset.theme = theme;
     headerAvatar.src = PROFILE_META[profile].avatar;
     headerAvatar.alt = `${profile}'s avatar`;
 }
