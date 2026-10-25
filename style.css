@@ -80,13 +80,11 @@ button:disabled {
 }
 
 html[data-theme="lilac"],
-body:has(.app-shell[data-profile-theme="lilac"]) {
-    color-scheme: light;
-    background: #fbf9fd;
-}
-
+html[data-theme="lilac"] body,
+:root:has(.app-shell[data-profile-theme="lilac"]),
+:root:has(.app-shell[data-profile-theme="lilac"]) body,
 .app-shell[data-profile-theme="lilac"] {
-    color-scheme: light;
+    color-scheme: light !important;
     --background: #fbf9fd;
     --surface: #ffffff;
     --surface-subtle: #f4ecf9;
@@ -99,11 +97,16 @@ body:has(.app-shell[data-profile-theme="lilac"]) {
     --accent-foreground: #ffffff;
     --accent-soft: #efe6f8;
     --affection: #d96e61;
+    color: #1f1b24;
 }
 
 @media (prefers-color-scheme: dark) {
+    html[data-theme="lilac"],
+    html[data-theme="lilac"] body,
+    :root:has(.app-shell[data-profile-theme="lilac"]),
+    :root:has(.app-shell[data-profile-theme="lilac"]) body,
     .app-shell[data-profile-theme="lilac"] {
-        color-scheme: light;
+        color-scheme: light !important;
         --background: #fbf9fd;
         --surface: #ffffff;
         --surface-subtle: #f4ecf9;
@@ -116,6 +119,7 @@ body:has(.app-shell[data-profile-theme="lilac"]) {
         --accent-foreground: #ffffff;
         --accent-soft: #efe6f8;
         --affection: #d96e61;
+        color: #1f1b24;
     }
 }
 
@@ -124,6 +128,7 @@ body:has(.app-shell[data-profile-theme="lilac"]) {
     min-height: 100vh;
     margin: 0 auto;
     background: var(--background);
+    color: var(--text);
 }
 
 .auth-gate,
@@ -178,6 +183,7 @@ p {
 
 h1 {
     margin-bottom: 8px;
+    color: var(--text);
     font-size: 26px;
     font-weight: 500;
     line-height: 1.16;
@@ -186,11 +192,13 @@ h1 {
 
 h2 {
     margin-bottom: 0;
+    color: var(--text);
     font-size: 18px;
     font-weight: 500;
 }
 
 h3 {
+    color: var(--text);
     font-size: 15px;
     font-weight: 500;
 }
@@ -366,6 +374,7 @@ p {
 
 .partner-status > strong {
     display: block;
+    color: var(--text);
     font-size: 18px;
     font-weight: 500;
     overflow-wrap: anywhere;
@@ -420,6 +429,7 @@ p {
 }
 
 .home-own-row strong {
+    color: var(--text);
     font-size: 15px;
     font-weight: 500;
 }
@@ -548,6 +558,7 @@ p {
 }
 
 .feature-card strong {
+    color: var(--text);
     font-size: 15px;
     font-weight: 500;
 }
