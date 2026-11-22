@@ -102,22 +102,22 @@ In dark appearance, invert the accent pairing so the selected state remains visi
 ### Rin profile: Lilac
 
 ```css
+color-scheme: light;
+--background: #fbf9fd;
+--surface: #ffffff;
+--surface-subtle: #f4ecf9;
+--text: #1f1b24;
+--text-muted: #6e6777;
+--border: #e7e0ee;
+--shadow: rgba(35, 15, 50, 0.07);
+--danger: #b42318;
 --accent: #7d68a7;
 --accent-foreground: #ffffff;
---accent-soft: #f0ebf7;
+--accent-soft: #efe6f8;
 --affection: #d96e61;
 ```
 
-Use coral only for partner status, affection, or a single warm highlight. Do not use it as a second general accent.
-
-Rin's dark appearance uses:
-
-```css
---accent: #baa5e4;
---accent-foreground: #1c1428;
---accent-soft: #2f2939;
---affection: #f69a8e;
-```
+Rin's Lilac profile theme is intentionally light and crisp (lilac and white). It retains this light appearance even when the operating system or browser prefers dark mode, ensuring soft lavender accents and bright surfaces. Julius's Mono profile theme continues to support dark mode.
 
 ### Color behavior
 
@@ -232,7 +232,9 @@ Use **Lucide** as the only interface icon family. Lucide's outline style matches
 | Movies | `clapperboard` |
 | Places to go | `map-pin` |
 | Food to eat | `utensils` |
+| Games to play | `gamepad-2` |
 | Wishlist | `gift` |
+| Shared notes | `notebook-pen` |
 | Add | `plus` |
 | Edit | `pencil` |
 | Delete | `trash-2` |
